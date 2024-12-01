@@ -1,0 +1,42 @@
+﻿@model IEnumerable<WebApplication7.Models.Property>
+
+@{
+    ViewData["Title"] = "My Properties";
+}
+
+<h2>My Properties</h2>
+
+<div class="row">
+    @foreach (var property in Model)
+    {
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <img class="card-img-top" src="@property.ImageUrl" alt="Property image">
+                <div class="card-body">
+                    <h5 class="card-title">@property.Address</h5>
+                    <p class="card-text">@property.Description</p>
+                    <p class="card-text"><strong>Price:</strong> @property.Price.ToString("C")</p>
+                    <a asp-action="Details" asp-controller="Properties" asp-route-id="@property.PropertyId" class="btn btn-primary">View Details</a>
+                    <a asp-action="Edit" asp-controller="Properties" asp-route-id="@property.PropertyId" class="btn btn-secondary">Edit</a>
+                    <a asp-action="Delete" asp-controller="Properties" asp-route-id="@property.PropertyId" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .text-center {
+        text-align: center;
+    }
+
+    .py-4 {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    .py-3 {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+</style>
