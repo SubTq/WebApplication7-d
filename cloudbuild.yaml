@@ -21,3 +21,6 @@ steps:
 
 images:
   - 'gcr.io/houserent-443409/houserent:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
