@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RentHouse</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .navbar-brand img {
+            height: 50px;
+        }
+
+        .navbar-nav .nav-item .interactive-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 5px #0056b3;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-right: 10px; /* Dodanie odstępu między przyciskami */
+        }
+
+            .navbar-nav .nav-item .interactive-button:hover {
+                background-color: #0056b3;
+            }
+
+            .navbar-nav .nav-item .interactive-button:active {
+                background-color: #004080;
+                box-shadow: 0 2px #0056b3;
+                transform: translateY(4px);
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand mx-auto" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logoApka.jpg" alt="RentHouse">
+                </a>
+                <div class="collapse navbar-collapse justify-content-end">
+                    <ul class="navbar-nav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link interactive-button" asp-area="" asp-controller="Properties" asp-action="MyProperties">My Properties</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link interactive-button" asp-area="" asp-controller="Properties" asp-action="Create">Add Property</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link interactive-button" asp-area="" asp-controller="Reservations" asp-action="MyReservations">My Reservations</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link interactive-button" asp-area="" asp-controller="Reservations" asp-action="Create">Add Reservation</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link interactive-button" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link interactive-button" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - RentHouse - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
