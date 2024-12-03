@@ -23,10 +23,18 @@ namespace WebApplication7.Controllers
         }
 
         // GET: Properties
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            _logger.LogInformation("Index action called");
-            return View(await _context.Properties.Include(p => p.OwnerUser).ToListAsync());
+            var properties = from p in _context.Properties
+                             select p;
+
+            // Filtracja wyników na podstawie wpisanego adresu
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                properties = properties.Where(p => p.Address.Contains(searchString));
+            }
+
+            return View(await properties.ToListAsync());
         }
 
         // GET: Properties/MyProperties
