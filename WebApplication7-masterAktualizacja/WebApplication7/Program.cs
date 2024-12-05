@@ -27,9 +27,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Dodaj widoki i kontrolery do aplikacji
 builder.Services.AddControllersWithViews();
 
-// Zostawienie domyœlnych ustawieñ URL (zamiast `UseUrls`) lub upewnienie siê, ¿e u¿ywasz w³aœciwej domeny
-// builder.WebHost.UseUrls("http://*:8080"); // Ewentualnie mo¿na usun¹æ lub dostosowaæ
+// Pobierz port z zmiennej œrodowiskowej
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 
+// Uruchom aplikacjê z ustawieniem dynamicznego portu
 var app = builder.Build();
 
 // Obs³uga wyj¹tków (ró¿ni siê w zale¿noœci od trybu)
@@ -57,6 +58,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Dodaj dynamiczne ustawienie URL na podstawie portu
+app.Urls.Add($"http://0.0.0.0:{port}");
 
 // Uruchom aplikacjê
 app.Run();
