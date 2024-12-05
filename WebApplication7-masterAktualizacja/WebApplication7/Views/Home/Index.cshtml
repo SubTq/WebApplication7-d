@@ -11,21 +11,21 @@
     <input type="text" id="searchString" placeholder="Wpisz adres..." class="search-box" />
 </div>
 
-<h2 class="text-center py-3">Properties for Rent</h2>
+
 <div class="row" id="propertiesList">
     @foreach (var property in Model)
     {
         <div class="col-md-4 d-flex align-items-stretch mb-4 property-card">
-            <a href="@Url.Action("Details", "Properties", new { id = property.PropertyId })" class="card-link w-100">
-                <div class="card h-100">
+            <div class="card w-100 h-100">
+                <a href="@Url.Action("Details", "Properties", new { id = property.PropertyId })" class="card-link">
                     <img class="card-img-top" src="@property.ImageUrl" alt="Property image">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title property-address">@property.Address</h5>
                         <p class="card-text flex-grow-1">@property.Description</p>
                         <p class="card-text"><strong>Price:</strong> @property.Price.ToString("C")</p>
                     </div>
-                </div>
-            </a>
+                </a>
+            </div>
         </div>
     }
 </div>
@@ -36,11 +36,14 @@
         let cards = document.querySelectorAll(".property-card");
 
         cards.forEach(card => {
-            let address = card.querySelector(".property-address").innerText.toLowerCase();
-            if (address.includes(filter)) {
-                card.style.display = "block";
-            } else {
-                card.style.display = "none";
+            let addressElement = card.querySelector(".property-address");
+            if (addressElement) {
+                let address = addressElement.innerText.toLowerCase();
+                if (address.includes(filter)) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
             }
         });
     });
