@@ -28,7 +28,6 @@ namespace WebApplication7.Controllers
             var properties = from p in _context.Properties
                              select p;
 
-            // Filtracja wyników na podstawie wpisanego adresu
             if (!string.IsNullOrEmpty(searchString))
             {
                 properties = properties.Where(p => p.Address.Contains(searchString));
@@ -61,6 +60,26 @@ namespace WebApplication7.Controllers
             return Json(new { properties });
         }
 
+        // GET: Properties/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var property = await _context.Properties
+                .Include(p => p.OwnerUser)
+                .FirstOrDefaultAsync(m => m.PropertyId == id);
+
+            if (property == null)
+            {
+                return NotFound();
+            }
+
+            return View(property);
+        }
+
         // GET: Properties/MyProperties
         public async Task<IActionResult> MyProperties()
         {
@@ -89,7 +108,6 @@ namespace WebApplication7.Controllers
         {
             _logger.LogInformation("Create action called");
             var userFirstName = User.Identity.Name;
-            _logger.LogInformation($"User.Identity.Name: {userFirstName}");
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
             if (user == null)
@@ -108,11 +126,9 @@ namespace WebApplication7.Controllers
         {
             if (ModelState.IsValid)
             {
-                _logger.LogInformation("Model state is valid");
                 try
                 {
                     var userFirstName = User.Identity.Name;
-                    _logger.LogInformation($"User.Identity.Name: {userFirstName}");
 
                     var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
                     if (user == null)
@@ -136,24 +152,8 @@ namespace WebApplication7.Controllers
                     ModelState.AddModelError("", "Unable to add property. Please try again.");
                 }
             }
-            else
-            {
-                _logger.LogWarning("Model state is invalid");
-                foreach (var error in ModelState)
-                {
-                    foreach (var subError in error.Value.Errors)
-                    {
-                        _logger.LogWarning($"Property: {error.Key}, Error: {subError.ErrorMessage}");
-                    }
-                }
-            }
-            var userNamePost = User.Identity.Name;
-            var userPost = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userNamePost);
-            ViewData["OwnerUserId"] = userPost?.UserId;
             return View(property);
         }
-
-        // Pozostałe metody kontrolera są takie same jak w Twoim oryginalnym kodzie...
 
         private bool PropertyExists(int id)
         {
