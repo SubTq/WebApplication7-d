@@ -19,11 +19,27 @@ namespace WebApplication7.Controllers
             var properties = await _context.Properties.Include(p => p.OwnerUser).ToListAsync();
             return View(properties);
         }
-
         [HttpGet]
-        public IActionResult Login()
+        public async Task<IActionResult> SearchProperties(string searchString)
         {
-            return View();
+            var properties = from p in _context.Properties
+                             select p;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                properties = properties.Where(p => p.Address.Contains(searchString));
+            }
+
+            var result = await properties.Select(p => new
+            {
+                p.PropertyId,
+                p.Address,
+                p.Description,
+                p.Price,
+                p.ImageUrl
+            }).ToListAsync();
+
+            return Json(result);
         }
 
         [HttpPost]
