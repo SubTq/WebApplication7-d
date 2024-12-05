@@ -11,7 +11,6 @@
     <input type="text" id="searchString" placeholder="Wpisz adres..." class="search-box" />
 </div>
 
-<h2 class="text-center py-3">Properties for Rent</h2>
 <div class="row" id="propertiesList">
     @foreach (var property in Model)
     {
@@ -30,18 +29,50 @@
     }
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    document.getElementById("searchString").addEventListener("input", function () {
-        let filter = this.value.toLowerCase();
-        let cards = document.querySelectorAll(".property-card");
+    $(document).ready(function () {
+        // Dodajemy nasłuchiwanie na zmiany w polu wyszukiwania (real-time search)
+        $("#searchString").on("input", function () {
+            let searchString = $(this).val(); // Pobranie wartości wpisanej przez użytkownika
 
-        cards.forEach(card => {
-            let address = card.querySelector(".property-address").innerText.toLowerCase();
-            if (address.includes(filter)) {
-                card.style.display = "block";
-            } else {
-                card.style.display = "none";
-            }
+            // DEBUG: Informacja w konsoli o wartości wpisanej przez użytkownika
+            console.log("Wysyłanie żądania AJAX do SearchProperties z searchString:", searchString);
+
+            // Wysyłamy żądanie AJAX do kontrolera, aby pobrać przefiltrowane mieszkania
+            $.ajax({
+                url: '@Url.Action("SearchProperties", "Home")',
+                data: { searchString: searchString },
+                success: function (data) {
+                    // DEBUG: Informacja w konsoli o otrzymanej odpowiedzi z serwera
+                    console.log("Otrzymano odpowiedź z serwera:", data);
+
+                    // Czyścimy poprzednie wyniki
+                    $("#propertiesList").empty();
+
+                    // Przechodzimy przez zwrócone wyniki i tworzymy nowe karty mieszkań
+                    data.forEach(function (property) {
+                        let card = `
+                                <div class="col-md-4 d-flex align-items-stretch mb-4 property-card">
+                                    <a href="/Properties/Details/${property.propertyId}" class="card-link w-100">
+                                        <div class="card h-100">
+                                            <img class="card-img-top" src="${property.imageUrl}" alt="Property image">
+                                            <div class="card-body d-flex flex-column">
+                                                <h5 class="card-title property-address">${property.address}</h5>
+                                                <p class="card-text flex-grow-1">${property.description}</p>
+                                                <p class="card-text"><strong>Price:</strong> ${property.price.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>`;
+                        $("#propertiesList").append(card);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    // DEBUG: Informacja w konsoli o błędzie związanym z żądaniem AJAX
+                    console.error("Błąd przy pobieraniu wyników wyszukiwania. Status:", status, "Błąd:", error);
+                }
+            });
         });
     });
 </script>
