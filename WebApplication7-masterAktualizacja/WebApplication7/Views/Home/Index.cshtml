@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<WebApplication7.Models.Property>
 @{
-    ViewData["Title"] = "Home Page1";
+    ViewData["Title"] = "Rent a House";
 }
 
 <div class="text-center py-4">
@@ -15,7 +15,7 @@
 <div class="row" id="propertiesList">
     @foreach (var property in Model)
     {
-        <div class="col-md-4 d-flex align-items-stretch mb-4">
+        <div class="col-md-4 d-flex align-items-stretch mb-4 property-card">
             <a href="@Url.Action("Details", "Properties", new { id = property.PropertyId })" class="card-link w-100">
                 <div class="card h-100">
                     <img class="card-img-top" src="@property.ImageUrl" alt="Property image">
