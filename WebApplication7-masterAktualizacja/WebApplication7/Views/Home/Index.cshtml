@@ -16,35 +16,56 @@
     @foreach (var property in Model)
     {
         <div class="col-md-4 d-flex align-items-stretch mb-4 property-card">
-            <div class="card w-100 h-100">
-                <a href="@Url.Action("Details", "Properties", new { id = property.PropertyId })" class="card-link">
+            <a href="@Url.Action("Details", "Properties", new { id = property.PropertyId })" class="card-link w-100">
+                <div class="card h-100">
                     <img class="card-img-top" src="@property.ImageUrl" alt="Property image">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title property-address">@property.Address</h5>
                         <p class="card-text flex-grow-1">@property.Description</p>
                         <p class="card-text"><strong>Price:</strong> @property.Price.ToString("C")</p>
                     </div>
-                </a>
-            </div>
+                </div>
+            </a>
         </div>
     }
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    document.getElementById("searchString").addEventListener("input", function () {
-        let filter = this.value.toLowerCase();
-        let cards = document.querySelectorAll(".property-card");
+    $(document).ready(function () {
+        $('#searchString').on('input', function () {
+            let query = $(this).val();
 
-        cards.forEach(card => {
-            let addressElement = card.querySelector(".property-address");
-            if (addressElement) {
-                let address = addressElement.innerText.toLowerCase();
-                if (address.includes(filter)) {
-                    card.style.display = "block";
-                } else {
-                    card.style.display = "none";
+            $.ajax({
+                url: '@Url.Action("SearchProperties", "Properties")',
+                type: 'GET',
+                data: { query: query },
+                success: function (data) {
+                    let propertiesList = $('#propertiesList');
+                    propertiesList.empty();
+
+                    if (data.properties.length === 0) {
+                        propertiesList.append('<p>Brak wyników dla podanego adresu.</p>');
+                    } else {
+                        data.properties.forEach(function (property) {
+                            propertiesList.append(`
+                                    <div class="col-md-4 d-flex align-items-stretch mb-4 property-card">
+                                        <a href="/Properties/Details/${property.PropertyId}" class="card-link w-100">
+                                            <div class="card h-100">
+                                                <img class="card-img-top" src="${property.ImageUrl}" alt="Property image">
+                                                <div class="card-body d-flex flex-column">
+                                                    <h5 class="card-title property-address">${property.Address}</h5>
+                                                    <p class="card-text flex-grow-1">${property.Description}</p>
+                                                    <p class="card-text"><strong>Price:</strong> ${property.Price}</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                `);
+                        });
+                    }
                 }
-            }
+            });
         });
     });
 </script>
