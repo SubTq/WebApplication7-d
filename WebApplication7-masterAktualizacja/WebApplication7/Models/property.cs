@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication7.Models
 {
@@ -29,8 +28,15 @@ namespace WebApplication7.Models
 
         public string Description { get; set; } = string.Empty;
 
-        [Url]
+        // Using RegularExpression for more flexible validation
+        [RegularExpression(@"^(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w \.-]*)*\/?$", ErrorMessage = "Please enter a valid URL.")]
         public string ImageUrl { get; set; } = string.Empty;
+
+        [RegularExpression(@"^(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w \.-]*)*\/?$", ErrorMessage = "Please enter a valid URL.")]
+        public string AdditionalImageUrl1 { get; set; } = string.Empty;
+
+        [RegularExpression(@"^(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w \.-]*)*\/?$", ErrorMessage = "Please enter a valid URL.")]
+        public string AdditionalImageUrl2 { get; set; } = string.Empty;
 
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }

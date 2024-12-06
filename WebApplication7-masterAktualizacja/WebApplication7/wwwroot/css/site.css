@@ -7,3 +7,47 @@ body {
     background-color: #f5f5f5;
     border-top: .05rem solid #e5e5e5;
 }
+
+/* Kontener menu */
+.menu-container {
+    position: relative;
+    width: 200px;
+}
+
+/* Hamburger menu */
+.hamburger {
+    font-size: 24px;
+    cursor: pointer;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Ukryta lista */
+.menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: none; /* Pocz¹tkowo ukryte */
+    background-color: #444;
+    position: absolute;
+    width: 100%;
+    z-index: 1000;
+}
+
+    /* Elementy listy */
+    .menu-list li {
+        padding: 10px;
+        border-bottom: 1px solid #555;
+    }
+
+        .menu-list li a {
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+
+            .menu-list li a:hover {
+                background-color: #555;
+            }

@@ -1,10 +1,10 @@
 ﻿@model WebApplication7.Models.Property
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Property";
 }
 
-<h1>Create</h1>
+<h2>Create Property</h2>
 
 <h4>Property</h4>
 <hr />
@@ -12,42 +12,65 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group">
                 <label asp-for="Address" class="control-label"></label>
                 <input asp-for="Address" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Type" class="control-label"></label>
                 <input asp-for="Type" class="form-control" />
                 <span asp-validation-for="Type" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Price" class="control-label"></label>
                 <input asp-for="Price" class="form-control" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Status" class="control-label"></label>
                 <input asp-for="Status" class="form-control" />
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="ContactNumber" class="control-label"></label>
                 <input asp-for="ContactNumber" class="form-control" />
                 <span asp-validation-for="ContactNumber" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
                 <textarea asp-for="Description" class="form-control"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
+
+            <!-- Main Image URL Input (Required) -->
             <div class="form-group">
-                <label asp-for="ImageUrl" class="control-label"></label>
+                <label asp-for="ImageUrl" class="control-label">Main Image URL (Required)</label>
                 <input asp-for="ImageUrl" class="form-control" />
                 <span asp-validation-for="ImageUrl" class="text-danger"></span>
             </div>
+
+            <!-- Additional Images URL Input (Optional) -->
+            <div class="form-group">
+                <label asp-for="AdditionalImageUrl1" class="control-label">Additional Image 1 URL (Optional)</label>
+                <input asp-for="AdditionalImageUrl1" class="form-control" />
+                <span asp-validation-for="AdditionalImageUrl1" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="AdditionalImageUrl2" class="control-label">Additional Image 2 URL (Optional)</label>
+                <input asp-for="AdditionalImageUrl2" class="form-control" />
+                <span asp-validation-for="AdditionalImageUrl2" class="text-danger"></span>
+            </div>
+
             <input type="hidden" asp-for="OwnerUserId" value="@ViewData["OwnerUserId"]" />
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -56,7 +79,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-secondary">Home</a>
 </div>
 
 @section Scripts {

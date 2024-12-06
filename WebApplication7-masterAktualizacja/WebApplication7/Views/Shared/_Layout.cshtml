@@ -13,67 +13,63 @@
             height: 50px;
         }
 
-        .navbar-nav .nav-item .interactive-button {
-            padding: 10px 20px;
-            font-size: 16px;
+        .hamburger-menu {
             cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            outline: none;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 5px #0056b3;
-            transition: background-color 0.3s, transform 0.3s;
-            margin-right: 10px; /* Dodanie odstępu między przyciskami */
+            font-size: 30px;
+            user-select: none;
         }
 
-            .navbar-nav .nav-item .interactive-button:hover {
-                background-color: #0056b3;
+        .menu-items {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            right: 20px;
+            top: 60px;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+            .menu-items a {
+                padding: 10px;
+                text-decoration: none;
+                color: #333;
+                transition: background-color 0.3s, transform 0.3s;
             }
 
-            .navbar-nav .nav-item .interactive-button:active {
-                background-color: #004080;
-                box-shadow: 0 2px #0056b3;
-                transform: translateY(4px);
-            }
+                .menu-items a:hover {
+                    background-color: #007bff;
+                    color: #fff;
+                    transform: scale(1.05);
+                }
     </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-light">
             <div class="container">
-                <a class="navbar-brand mx-auto" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     <img src="~/images/logoApka.jpg" alt="RentHouse">
                 </a>
-                <div class="collapse navbar-collapse justify-content-end">
-                    <ul class="navbar-nav">
+                <div class="ml-auto">
+                    <div class="hamburger-menu" id="hamburgerMenu">&#9776;</div>
+                    <div class="menu-items" id="menuItems">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link interactive-button" asp-area="" asp-controller="Properties" asp-action="MyProperties">My Properties</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link interactive-button" asp-area="" asp-controller="Properties" asp-action="Create">Add Property</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link interactive-button" asp-area="" asp-controller="Reservations" asp-action="MyReservations">My Reservations</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link interactive-button" asp-area="" asp-controller="Reservations" asp-action="Create">Add Reservation</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link interactive-button" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
-                            </li>
+                            <a asp-area="" asp-controller="Properties" asp-action="MyProperties">My Properties</a>
+                            <a asp-area="" asp-controller="Properties" asp-action="Create">Add Property</a>
+                            <a asp-area="" asp-controller="Reservations" asp-action="MyReservations">My Reservations</a>
+                            <a asp-area="" asp-controller="Reservations" asp-action="Create">Add Reservation</a>
+                            <a asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                         }
                         else
                         {
-                            <li class="nav-item">
-                                <a class="nav-link interactive-button" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
+                            <a asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                            <a asp-area="" asp-controller="Account" asp-action="Register">Register</a>
                         }
-                    </ul>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -91,5 +87,35 @@
     </footer>
 
     @RenderSection("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            const menuItems = $('#menuItems');
+
+            // Pokaż/ukryj menu po kliknięciu na hamburgera
+            $('#hamburgerMenu').hover(
+                function () {
+                    menuItems.fadeIn(200);
+                },
+                function () {
+                    // Upewniamy się, że lista znika, jeśli użytkownik zjeżdża kursorem
+                    setTimeout(function () {
+                        if (!menuItems.is(':hover')) {
+                            menuItems.fadeOut(200);
+                        }
+                    }, 300);
+                }
+            );
+
+            menuItems.hover(
+                function () {
+                    // Zatrzymaj zamykanie menu, gdy jesteśmy na menu
+                },
+                function () {
+                    menuItems.fadeOut(200);
+                }
+            );
+        });
+    </script>
 </body>
 </html>

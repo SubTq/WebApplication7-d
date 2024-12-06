@@ -64,7 +64,7 @@ namespace WebApplication7.Migrations
 
                     b.HasIndex("OwnerUserId");
 
-                    b.ToTable("Properties");
+                    b.ToTable("Properties", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication7.Models.Reservation", b =>
@@ -97,7 +97,7 @@ namespace WebApplication7.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication7.Models.User", b =>
@@ -126,7 +126,7 @@ namespace WebApplication7.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication7.Models.Property", b =>

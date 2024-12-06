@@ -36,16 +36,29 @@ namespace WebApplication7.Controllers
             return View(await properties.ToListAsync());
         }
 
-        // Nowy endpoint AJAX do wyszukiwania nieruchomości
         [HttpGet]
+        [AllowAnonymous] // Dodaj ten atrybut, aby metoda była dostępna bez logowania
         public async Task<IActionResult> SearchProperties(string query)
         {
+            // Gdy query jest puste lub null, zwróć wszystkie nieruchomości
             if (string.IsNullOrWhiteSpace(query))
             {
-                return Json(new { properties = new string[] { } });
+                var allProperties = await _context.Properties
+                    .Select(p => new
+                    {
+                        p.PropertyId,
+                        p.Address,
+                        p.ImageUrl,
+                        p.Description,
+                        Price = p.Price.ToString("C")
+                    })
+                    .ToListAsync();
+
+                return Json(new { properties = allProperties });
             }
 
-            var properties = await _context.Properties
+            // Gdy query jest niepuste, wykonaj filtrowanie po adresie
+            var filteredProperties = await _context.Properties
                 .Where(p => p.Address.Contains(query))
                 .Select(p => new
                 {
@@ -57,10 +70,11 @@ namespace WebApplication7.Controllers
                 })
                 .ToListAsync();
 
-            return Json(new { properties });
+            return Json(new { properties = filteredProperties });
         }
 
         // GET: Properties/Details/5
+        [AllowAnonymous] // Umożliwia dostęp do metody dla niezalogowanych użytkowników
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -76,6 +90,11 @@ namespace WebApplication7.Controllers
             {
                 return NotFound();
             }
+
+            // Obsługa wartości null dla zdjęć
+            ViewData["MainImageUrl"] = !string.IsNullOrEmpty(property.ImageUrl) ? property.ImageUrl : null;
+            ViewData["AdditionalImageUrl1"] = !string.IsNullOrEmpty(property.AdditionalImageUrl1) ? property.AdditionalImageUrl1 : null;
+            ViewData["AdditionalImageUrl2"] = !string.IsNullOrEmpty(property.AdditionalImageUrl2) ? property.AdditionalImageUrl2 : null;
 
             return View(property);
         }
@@ -122,7 +141,7 @@ namespace WebApplication7.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("PropertyId,Address,Type,Price,Status,ContactNumber,Description,ImageUrl")] Property property)
+        public async Task<IActionResult> Create([Bind("PropertyId,Address,Type,Price,Status,ContactNumber,Description,ImageUrl,AdditionalImageUrl1,AdditionalImageUrl2")] Property property)
         {
             if (ModelState.IsValid)
             {
@@ -140,6 +159,28 @@ namespace WebApplication7.Controllers
                     {
                         property.OwnerUserId = user.UserId;
                         property.OwnerUser = user;
+
+                        // Zapisz linki do obrazów
+                        if (!Uri.IsWellFormedUriString(property.ImageUrl, UriKind.Absolute))
+                        {
+                            ModelState.AddModelError("ImageUrl", "The ImageUrl field must be a valid URL.");
+                            return View(property);
+                        }
+
+                        if (!string.IsNullOrEmpty(property.AdditionalImageUrl1) &&
+                            !Uri.IsWellFormedUriString(property.AdditionalImageUrl1, UriKind.Absolute))
+                        {
+                            ModelState.AddModelError("AdditionalImageUrl1", "Additional Image 1 URL must be a valid URL.");
+                            return View(property);
+                        }
+
+                        if (!string.IsNullOrEmpty(property.AdditionalImageUrl2) &&
+                            !Uri.IsWellFormedUriString(property.AdditionalImageUrl2, UriKind.Absolute))
+                        {
+                            ModelState.AddModelError("AdditionalImageUrl2", "Additional Image 2 URL must be a valid URL.");
+                            return View(property);
+                        }
+
                         _context.Add(property);
                         await _context.SaveChangesAsync();
                         _logger.LogInformation("Property added successfully");

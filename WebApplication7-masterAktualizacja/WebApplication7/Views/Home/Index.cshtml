@@ -8,7 +8,7 @@
 </div>
 
 <div class="search-container">
-    <input type="text" id="searchString" placeholder="Wpisz adres..." class="search-box" />
+    <input type="text" id="searchString" placeholder="Enter address..." class="search-box" />
 </div>
 
 <div class="row" id="propertiesList">
@@ -29,46 +29,74 @@
     }
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     $(document).ready(function () {
-        $("#searchString").on("input", function () {
-            let searchString = $(this).val();
+        $('#searchString').on('input', function () {
+            let query = $(this).val();
 
-            console.log("Wysyłanie żądania AJAX do SearchProperties z searchString:", searchString);
+            // Gdy pole jest puste, załaduj wszystkie nieruchomości
+            if (query.trim() === "") {
+                loadAllProperties();
+                return;
+            }
 
+            // Gdy użytkownik wpisuje frazę, wykonaj filtrowanie
             $.ajax({
-                url: '@Url.Action("SearchProperties", "Home")',
-                data: { searchString: searchString },
-                success: function (data) {
-                    console.log("Otrzymano odpowiedź z serwera:", data);
-
-                    $("#propertiesList").empty();
-
-                    data.forEach(function (property) {
-                        let detailsUrl = '@Url.Action("Details", "Properties", new { id = "ID_PLACEHOLDER" })'.replace('ID_PLACEHOLDER', property.propertyId);
-
-                        let card = `
+                url: '/Properties/SearchProperties',
+                type: 'GET',
+                data: { query: query },
+                success: function (response) {
+                    $('#propertiesList').empty();
+                    response.properties.forEach(property => {
+                        $('#propertiesList').append(`
                                 <div class="col-md-4 d-flex align-items-stretch mb-4 property-card">
-                                    <a href="${detailsUrl}" class="card-link w-100">
+                                    <a href="/Properties/Details/${property.propertyId}" class="card-link w-100">
                                         <div class="card h-100">
                                             <img class="card-img-top" src="${property.imageUrl}" alt="Property image">
                                             <div class="card-body d-flex flex-column">
                                                 <h5 class="card-title property-address">${property.address}</h5>
                                                 <p class="card-text flex-grow-1">${property.description}</p>
-                                                <p class="card-text"><strong>Price:</strong> ${property.price.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}</p>
+                                                <p class="card-text"><strong>Price:</strong> ${property.price}</p>
                                             </div>
                                         </div>
                                     </a>
-                                </div>`;
-                        $("#propertiesList").append(card);
+                                </div>
+                            `);
                     });
-                },
-                error: function (xhr, status, error) {
-                    console.error("Błąd przy pobieraniu wyników wyszukiwania. Status:", status, "Błąd:", error);
                 }
             });
         });
+
+        // Funkcja ładowania wszystkich nieruchomości
+        function loadAllProperties() {
+            $.ajax({
+                url: '/Properties/SearchProperties',
+                type: 'GET',
+                data: { query: '' }, // Wysłanie pustego zapytania, aby załadować wszystkie nieruchomości
+                success: function (response) {
+                    $('#propertiesList').empty();
+                    response.properties.forEach(property => {
+                        $('#propertiesList').append(`
+                                <div class="col-md-4 d-flex align-items-stretch mb-4 property-card">
+                                    <a href="/Properties/Details/${property.propertyId}" class="card-link w-100">
+                                        <div class="card h-100">
+                                            <img class="card-img-top" src="${property.imageUrl}" alt="Property image">
+                                            <div class="card-body d-flex flex-column">
+                                                <h5 class="card-title property-address">${property.address}</h5>
+                                                <p class="card-text flex-grow-1">${property.description}</p>
+                                                <p class="card-text"><strong>Price:</strong> ${property.price}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            `);
+                    });
+                }
+            });
+        }
+
+        // Załaduj wszystkie nieruchomości na początku
+        loadAllProperties();
     });
 </script>
 
