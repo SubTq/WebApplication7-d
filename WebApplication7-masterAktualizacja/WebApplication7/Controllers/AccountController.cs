@@ -69,8 +69,20 @@ namespace WebApplication7.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-                if (user != null && user.VerifyPassword(password))
+
+                if (user == null)
                 {
+                    // Obsługa błędu: użytkownik nie istnieje
+                    ViewData["ErrorMessage"] = "No account found with this email.";
+                }
+                else if (!user.VerifyPassword(password))
+                {
+                    // Obsługa błędu: nieprawidłowe hasło
+                    ViewData["ErrorMessage"] = "Incorrect password.";
+                }
+                else
+                {
+                    // Użytkownik poprawnie zalogowany
                     var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, user.FirstName),
@@ -80,8 +92,11 @@ namespace WebApplication7.Controllers
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
                     return RedirectToAction("Index", "Home");
                 }
-
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            }
+            else
+            {
+                // Obsługa błędu walidacji modelu
+                ViewData["ErrorMessage"] = "Please fill in all required fields correctly.";
             }
 
             return View();

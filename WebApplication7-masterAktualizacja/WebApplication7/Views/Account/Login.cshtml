@@ -10,6 +10,14 @@
 
 <h2 class="text-center">Login</h2>
 
+<!-- Sekcja wyświetlania błędu -->
+@if (ViewData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger text-center">
+        @ViewData["ErrorMessage"]
+    </div>
+}
+
 <form asp-action="Login" method="post" class="form-horizontal">
     <div class="form-group">
         <label asp-for="Email" class="control-label"></label>

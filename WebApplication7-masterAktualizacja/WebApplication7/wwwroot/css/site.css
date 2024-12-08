@@ -1,3 +1,4 @@
+/* Stylizacja ogólna */
 body {
     padding-top: 20px;
 }
@@ -8,46 +9,56 @@ body {
     border-top: .05rem solid #e5e5e5;
 }
 
-/* Kontener menu */
-.menu-container {
-    position: relative;
-    width: 200px;
+/* Ustawienia dla kontenera hamburgera */
+.hamburger-menu-container {
+    position: relative; /* Kontekst dla pozycjonowania menu */
+    display: inline-block; /* Zapewnia odpowiednie wyrównanie */
 }
 
-/* Hamburger menu */
-.hamburger {
-    font-size: 24px;
+/* Stylizacja ikony hamburgera */
+.hamburger-menu {
+    font-size: 30px;
     cursor: pointer;
-    background-color: #333;
-    color: white;
+    user-select: none;
+}
+
+/* Stylizacja rozwijanego menu */
+.menu-items {
+    position: absolute; /* Pozycjonowanie wzglêdem kontenera */
+    top: calc(100% + 5px); /* Umieszczone 5px poni¿ej hamburgera */
+    left: 0; /* Wyrównane do lewej krawêdzi kontenera */
+    background-color: #f8f9fa; /* Kolor t³a menu */
+    border: 1px solid #ccc; /* Ramka menu */
+    border-radius: 8px; /* Zaokr¹glenie rogów */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Cieñ dla menu */
     padding: 10px;
-    text-align: center;
+    z-index: 1000; /* Wy¿szy priorytet wyœwietlania */
+    display: none; /* Domyœlnie ukryte */
+    min-width: 150px; /* Minimalna szerokoœæ menu */
+    max-width: 250px; /* Maksymalna szerokoœæ menu */
+    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
 }
 
-/* Ukryta lista */
-.menu-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: none; /* Pocz¹tkowo ukryte */
-    background-color: #444;
-    position: absolute;
-    width: 100%;
-    z-index: 1000;
-}
-
-    /* Elementy listy */
-    .menu-list li {
+    /* Stylizacja linków w menu */
+    .menu-items a {
+        display: block;
+        text-decoration: none;
         padding: 10px;
-        border-bottom: 1px solid #555;
+        color: #333;
+        transition: background-color 0.3s ease, transform 0.3s ease;
     }
 
-        .menu-list li a {
-            text-decoration: none;
+        .menu-items a:hover {
+            background-color: #007bff;
             color: white;
-            display: block;
+            transform: scale(1.05);
         }
 
-            .menu-list li a:hover {
-                background-color: #555;
-            }
+/* Dostosowanie dla urz¹dzeñ mobilnych */
+@media (max-width: 768px) {
+    .menu-items {
+        width: 100%; /* Pe³na szerokoœæ na urz¹dzeniach mobilnych */
+        left: 0;
+        right: 0;
+    }
+}
