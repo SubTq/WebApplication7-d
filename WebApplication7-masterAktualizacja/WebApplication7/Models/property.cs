@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication7.Models
 {
@@ -28,15 +29,18 @@ namespace WebApplication7.Models
 
         public string Description { get; set; } = string.Empty;
 
-        // Using RegularExpression for more flexible validation
-        [RegularExpression(@"^(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w \.-]*)*\/?$", ErrorMessage = "Please enter a valid URL.")]
+        // Wymagany główny obraz z bardziej elastyczną walidacją URL
+        [Required(ErrorMessage = "Main image URL is required.")]
+        [RegularExpression(@"^(https?:\/\/)[\w\-]+(\.[\w\-]+)+(:\d+)?(\/[\w\-\.]*)*(\?.*)?$", ErrorMessage = "Please enter a valid URL starting with http:// or https://.")]
         public string ImageUrl { get; set; } = string.Empty;
 
-        [RegularExpression(@"^(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w \.-]*)*\/?$", ErrorMessage = "Please enter a valid URL.")]
-        public string AdditionalImageUrl1 { get; set; } = string.Empty;
+        // Opcjonalny pierwszy dodatkowy obraz z walidacją URL
+        [RegularExpression(@"^(https?:\/\/)[\w\-]+(\.[\w\-]+)+(:\d+)?(\/[\w\-\.]*)*(\?.*)?$", ErrorMessage = "Please enter a valid URL starting with http:// or https://.")]
+        public string? AdditionalImageUrl1 { get; set; }
 
-        [RegularExpression(@"^(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w \.-]*)*\/?$", ErrorMessage = "Please enter a valid URL.")]
-        public string AdditionalImageUrl2 { get; set; } = string.Empty;
+        // Opcjonalny drugi dodatkowy obraz z walidacją URL
+        [RegularExpression(@"^(https?:\/\/)[\w\-]+(\.[\w\-]+)+(:\d+)?(\/[\w\-\.]*)*(\?.*)?$", ErrorMessage = "Please enter a valid URL starting with http:// or https://.")]
+        public string? AdditionalImageUrl2 { get; set; }
 
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }

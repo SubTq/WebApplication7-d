@@ -31,29 +31,45 @@ namespace WebApplication7.Controllers
         // POST: Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register([Bind("FirstName,LastName,Email,Password")] User user)
+        public async Task<IActionResult> Register(RegisterModel model)
         {
             if (ModelState.IsValid)
             {
-                user.SetPassword(user.Password); // Hashowanie hasła
+                // Sprawdzenie, czy e-mail jest już zajęty
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+                if (existingUser != null)
+                {
+                    ViewData["ErrorMessage"] = "An account with this email already exists.";
+                    return View(model);
+                }
 
-                _context.Add(user);
+                // Utworzenie nowego użytkownika
+                var user = new User
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Email = model.Email
+                };
+                user.SetPassword(model.Password); // Hashowanie hasła
+
+                _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                // Logowanie nowo zarejestrowanego użytkownika
+                // Automatyczne logowanie nowo zarejestrowanego użytkownika
                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.FirstName),
-                    new Claim(ClaimTypes.Email, user.Email)
-                };
+        {
+            new Claim(ClaimTypes.Name, user.FirstName),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
                 return RedirectToAction("Index", "Home");
             }
 
-            return View(user);
+            return View(model);
         }
+
 
         // GET: Account/Login
         public IActionResult Login()

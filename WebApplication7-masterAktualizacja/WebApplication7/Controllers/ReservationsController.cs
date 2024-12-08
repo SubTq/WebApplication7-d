@@ -71,7 +71,6 @@ namespace WebApplication7.Controllers
         // GET: Reservations/Create
         public async Task<IActionResult> Create()
         {
-            _logger.LogInformation("Create GET action called");
             var userFirstName = User.Identity.Name;
             var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
 
@@ -81,9 +80,10 @@ namespace WebApplication7.Controllers
                 return NotFound("User not found");
             }
 
+            // Pobierz tylko nieruchomości, które nie należą do użytkownika
             var availableProperties = await _context.Properties
-            .Where(p => p.OwnerUserId != user.UserId)
-            .ToListAsync();
+                .Where(p => p.OwnerUserId != user.UserId)
+                .ToListAsync();
 
             ViewData["Properties"] = new SelectList(availableProperties, "PropertyId", "Address");
             return View();
@@ -94,91 +94,53 @@ namespace WebApplication7.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ReservationId,PropertyId,StartDate,EndDate,Status")] Reservation reservation)
         {
-            _logger.LogInformation("Attempting to create reservation with PropertyId: {PropertyId}", reservation.PropertyId);
-
             if (ModelState.IsValid)
             {
                 var userFirstName = User.Identity.Name;
-                _logger.LogInformation("Current user first name: {UserFirstName}", userFirstName);
-
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
+
                 if (user == null)
                 {
-                    _logger.LogWarning("User not found for first name: {UserFirstName}", userFirstName);
                     ModelState.AddModelError("", "User not found.");
-                }
-                else
-                {
-                    _logger.LogInformation("User found: {UserId}", user.UserId);
+                    return View(reservation);
                 }
 
                 var property = await _context.Properties.FirstOrDefaultAsync(p => p.PropertyId == reservation.PropertyId);
                 if (property == null)
                 {
-                    _logger.LogWarning("Property not found for PropertyId: {PropertyId}", reservation.PropertyId);
                     ModelState.AddModelError("", "Property not found.");
-                }
-                else
-                {
-                    _logger.LogInformation("Property found: {PropertyId}", property.PropertyId);
+                    return View(reservation);
                 }
 
-                if (user != null && property != null)
+                if (property.OwnerUserId == user.UserId)
                 {
-                    if (property.OwnerUserId == user.UserId)
-                    {
-                        _logger.LogWarning("User {UserId} attempted to reserve their own property {PropertyId}", user.UserId, property.PropertyId);
-                        ModelState.AddModelError("", "You cannot reserve your own property.");
-                    }
-                    else
-                    {
-                        // Check for conflicting reservations
-                        var conflictingReservations = await _context.Reservations
-                        .Where(r => r.PropertyId == reservation.PropertyId &&
-                        r.StartDate < reservation.EndDate &&
-                        r.EndDate > reservation.StartDate)
-                        .ToListAsync();
+                    ModelState.AddModelError("", "You cannot reserve your own property.");
+                    return View(reservation);
+                }
 
-                        if (conflictingReservations.Any())
-                        {
-                            _logger.LogWarning("Attempt to reserve property {PropertyId} during already reserved dates", property.PropertyId);
-                            ModelState.AddModelError("", "The property is already reserved during the selected dates.");
-                        }
-                        else
-                        {
-                            reservation.UserId = user.UserId;
-                            reservation.Property = property;
-                            _context.Add(reservation);
-                            try
-                            {
-                                await _context.SaveChangesAsync();
-                                _logger.LogInformation("Reservation created successfully");
-                                return RedirectToAction(nameof(MyReservations));
-                            }
-                            catch (DbUpdateException ex)
-                            {
-                                _logger.LogError(ex, "An error occurred while creating the reservation");
-                                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                _logger.LogWarning("Model state is invalid");
-                foreach (var state in ModelState)
+                // Sprawdź, czy są konflikty terminów
+                var conflictingReservations = await _context.Reservations
+                    .Where(r => r.PropertyId == reservation.PropertyId &&
+                                r.StartDate < reservation.EndDate &&
+                                r.EndDate > reservation.StartDate)
+                    .ToListAsync();
+
+                if (conflictingReservations.Any())
                 {
-                    foreach (var error in state.Value.Errors)
-                    {
-                        _logger.LogWarning("Property: {Property}, Error: {Error}", state.Key, error.ErrorMessage);
-                    }
+                    ModelState.AddModelError("", "The property is already reserved during the selected dates.");
+                    return View(reservation);
                 }
+
+                reservation.UserId = user.UserId;
+                _context.Add(reservation);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(MyReservations));
             }
 
+            // Jeśli walidacja się nie powiodła
             var availableProperties = await _context.Properties
-            .Where(p => p.OwnerUserId != reservation.UserId)
-            .ToListAsync();
+                .Where(p => p.OwnerUserId != reservation.UserId)
+                .ToListAsync();
 
             ViewData["Properties"] = new SelectList(availableProperties, "PropertyId", "Address", reservation.PropertyId);
             return View(reservation);

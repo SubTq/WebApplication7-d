@@ -1,10 +1,17 @@
-﻿@model WebApplication7.Models.User
+﻿@model WebApplication7.Models.RegisterModel
 
 @{
     ViewData["Title"] = "Register";
 }
 
 <h2>Register</h2>
+
+@if (ViewData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @ViewData["ErrorMessage"]
+    </div>
+}
 
 <form asp-action="Register">
     <div class="form-group">
@@ -37,7 +44,5 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @Html.Partial("_ValidationScriptsPartial")
 }
