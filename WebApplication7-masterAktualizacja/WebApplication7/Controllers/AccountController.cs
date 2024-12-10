@@ -35,30 +35,30 @@ namespace WebApplication7.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Sprawdzenie, czy e-mail jest już zajęty
-                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+                var normalizedEmail = model.Email.Trim().ToUpperInvariant();
+                var existingUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
                 if (existingUser != null)
                 {
                     ViewData["ErrorMessage"] = "An account with this email already exists.";
                     return View(model);
                 }
 
-                // Utworzenie nowego użytkownika
                 var user = new User
                 {
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    Email = model.Email
+                    Email = model.Email,
+                    NormalizedEmail = model.Email.Trim().ToUpperInvariant() // Bez metody NormalizeEmail
                 };
-                user.SetPassword(model.Password); // Hashowanie hasła
+                user.SetPassword(model.Password);
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                // Automatyczne logowanie nowo zarejestrowanego użytkownika
                 var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.FirstName),
+            new Claim(ClaimTypes.Name, user.Email),
             new Claim(ClaimTypes.Email, user.Email)
         };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -69,6 +69,7 @@ namespace WebApplication7.Controllers
 
             return View(model);
         }
+
 
 
         // GET: Account/Login
@@ -84,26 +85,25 @@ namespace WebApplication7.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                var normalizedEmail = email.Trim().ToUpperInvariant();
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
 
                 if (user == null)
                 {
-                    // Obsługa błędu: użytkownik nie istnieje
                     ViewData["ErrorMessage"] = "No account found with this email.";
                 }
                 else if (!user.VerifyPassword(password))
                 {
-                    // Obsługa błędu: nieprawidłowe hasło
                     ViewData["ErrorMessage"] = "Incorrect password.";
                 }
                 else
                 {
-                    // Użytkownik poprawnie zalogowany
                     var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, user.FirstName),
-                        new Claim(ClaimTypes.Email, user.Email)
-                    };
+            {
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
                     return RedirectToAction("Index", "Home");
@@ -111,12 +111,13 @@ namespace WebApplication7.Controllers
             }
             else
             {
-                // Obsługa błędu walidacji modelu
                 ViewData["ErrorMessage"] = "Please fill in all required fields correctly.";
             }
 
             return View();
         }
+
+
 
         public async Task<IActionResult> Logout()
         {

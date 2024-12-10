@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
@@ -25,8 +24,7 @@ namespace WebApplication7.Controllers
         // GET: Properties
         public async Task<IActionResult> Index(string searchString)
         {
-            var properties = from p in _context.Properties
-                             select p;
+            var properties = from p in _context.Properties select p;
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -37,10 +35,9 @@ namespace WebApplication7.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous] // Dodaj ten atrybut, aby metoda była dostępna bez logowania
+        [AllowAnonymous]
         public async Task<IActionResult> SearchProperties(string query)
         {
-            // Gdy query jest puste lub null, zwróć wszystkie nieruchomości
             if (string.IsNullOrWhiteSpace(query))
             {
                 var allProperties = await _context.Properties
@@ -57,7 +54,6 @@ namespace WebApplication7.Controllers
                 return Json(new { properties = allProperties });
             }
 
-            // Gdy query jest niepuste, wykonaj filtrowanie po adresie
             var filteredProperties = await _context.Properties
                 .Where(p => p.Address.Contains(query))
                 .Select(p => new
@@ -74,7 +70,7 @@ namespace WebApplication7.Controllers
         }
 
         // GET: Properties/Details/5
-        [AllowAnonymous] // Umożliwia dostęp do metody dla niezalogowanych użytkowników
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -91,7 +87,12 @@ namespace WebApplication7.Controllers
                 return NotFound();
             }
 
-            // Obsługa wartości null dla zdjęć
+            var currentUserEmail = User.Identity?.Name;
+
+            ViewData["IsOwner"] = property.OwnerUser?.Email == currentUserEmail;
+            ViewData["CurrentUserEmail"] = currentUserEmail;
+            ViewData["OwnerEmail"] = property.OwnerUser?.Email;
+
             ViewData["MainImageUrl"] = !string.IsNullOrEmpty(property.ImageUrl) ? property.ImageUrl : null;
             ViewData["AdditionalImageUrl1"] = !string.IsNullOrEmpty(property.AdditionalImageUrl1) ? property.AdditionalImageUrl1 : null;
             ViewData["AdditionalImageUrl2"] = !string.IsNullOrEmpty(property.AdditionalImageUrl2) ? property.AdditionalImageUrl2 : null;
@@ -102,22 +103,20 @@ namespace WebApplication7.Controllers
         // GET: Properties/MyProperties
         public async Task<IActionResult> MyProperties()
         {
-            var userFirstName = User.Identity.Name;
-            _logger.LogInformation("Current user first name: {UserFirstName}", userFirstName);
+            var currentUserEmail = User.Identity.Name;
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
-            if (user == null)
+            if (string.IsNullOrEmpty(currentUserEmail))
             {
-                _logger.LogWarning("User not found for first name: {UserFirstName}", userFirstName);
+                _logger.LogWarning("Current user email is null or empty.");
                 return NotFound("User not found");
             }
 
             var properties = await _context.Properties
-                .Where(p => p.OwnerUserId == user.UserId)
+                .Where(p => p.OwnerUser.Email == currentUserEmail)
                 .Include(p => p.OwnerUser)
                 .ToListAsync();
 
-            _logger.LogInformation("Retrieved {Count} properties for user {UserId}", properties.Count, user.UserId);
+            _logger.LogInformation("Retrieved {Count} properties for user {Email}", properties.Count, currentUserEmail);
             return View(properties);
         }
 
@@ -125,15 +124,16 @@ namespace WebApplication7.Controllers
         [Authorize]
         public async Task<IActionResult> Create()
         {
-            _logger.LogInformation("Create action called");
-            var userFirstName = User.Identity.Name;
+            var currentUserEmail = User.Identity.Name;
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
             if (user == null)
             {
-                _logger.LogWarning($"User with name {userFirstName} not found.");
+                _logger.LogWarning($"User with email {currentUserEmail} not found.");
+                return NotFound("User not found.");
             }
-            ViewData["OwnerUserId"] = user?.UserId;
+
+            ViewData["OwnerUserId"] = user.UserId;
             return View();
         }
 
@@ -147,20 +147,19 @@ namespace WebApplication7.Controllers
             {
                 try
                 {
-                    var userFirstName = User.Identity.Name;
+                    var currentUserEmail = User.Identity.Name;
 
-                    var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
                     if (user == null)
                     {
-                        ModelState.AddModelError("", $"Owner user with name {userFirstName} not found.");
-                        _logger.LogWarning($"Owner user with name {userFirstName} not found.");
+                        ModelState.AddModelError("", $"Owner user with email {currentUserEmail} not found.");
+                        _logger.LogWarning($"Owner user with email {currentUserEmail} not found.");
                     }
                     else
                     {
                         property.OwnerUserId = user.UserId;
                         property.OwnerUser = user;
 
-                        // Zapisz linki do obrazów
                         if (!Uri.IsWellFormedUriString(property.ImageUrl, UriKind.Absolute))
                         {
                             ModelState.AddModelError("ImageUrl", "The ImageUrl field must be a valid URL.");

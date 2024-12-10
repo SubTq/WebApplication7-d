@@ -69,25 +69,25 @@ namespace WebApplication7.Controllers
         }
 
         // GET: Reservations/Create
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int? propertyId)
         {
-            var userFirstName = User.Identity.Name;
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
-
-            if (user == null)
+            if (propertyId == null)
             {
-                _logger.LogWarning($"User with name {userFirstName} not found.");
-                return NotFound("User not found");
+                return NotFound();
             }
 
-            // Pobierz tylko nieruchomości, które nie należą do użytkownika
-            var availableProperties = await _context.Properties
-                .Where(p => p.OwnerUserId != user.UserId)
-                .ToListAsync();
+            var property = await _context.Properties.FirstOrDefaultAsync(p => p.PropertyId == propertyId);
 
-            ViewData["Properties"] = new SelectList(availableProperties, "PropertyId", "Address");
+            if (property == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["PropertyId"] = propertyId;
+            ViewData["PropertyAddress"] = property.Address; // Automatyczne ustawienie adresu
             return View();
         }
+
 
         // POST: Reservations/Create
         [HttpPost]

@@ -57,12 +57,8 @@
             <!-- Main Image URL (Required) -->
             <div class="form-group">
                 <label asp-for="ImageUrl" class="control-label">Main Image URL (Required)</label>
-                <input asp-for="ImageUrl" id="mainImageInput" class="form-control" />
+                <input asp-for="ImageUrl" class="form-control" />
                 <span asp-validation-for="ImageUrl" class="text-danger"></span>
-            </div>
-            <!-- Preview for Main Image -->
-            <div class="form-group">
-                <img id="mainImagePreview" src="" alt="Main Image Preview" class="img-fluid" style="display:none; max-width: 100%; height: auto;" />
             </div>
 
             <!-- Additional Image 1 URL (Optional) -->
@@ -98,20 +94,4 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
-    <script>
-        $(document).ready(function () {
-            // Preview the main image when the URL changes
-            $('#mainImageInput').on('input', function () {
-                const imageUrl = $(this).val();
-                const preview = $('#mainImagePreview');
-
-                if (imageUrl && imageUrl.startsWith('http')) {
-                    preview.attr('src', imageUrl).show();
-                } else {
-                    preview.hide();
-                }
-            });
-        });
-    </script>
 }

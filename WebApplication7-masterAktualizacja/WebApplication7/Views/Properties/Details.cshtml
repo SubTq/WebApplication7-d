@@ -7,50 +7,36 @@
 
 <h2>Property Details</h2>
 
+<!-- Diagnostyka -->
+<p><strong>Current User Email:</strong> @ViewData["CurrentUserEmail"]</p>
+<p><strong>Owner Email:</strong> @ViewData["OwnerEmail"]</p>
+
 <div>
     <hr />
     <div class="property-images">
-        <!-- Main Image -->
+        <!-- Główne zdjęcie -->
         @if (!string.IsNullOrEmpty((string)ViewData["MainImageUrl"]))
         {
             <img src="@ViewData["MainImageUrl"]" alt="Main Property Image" class="thumbnail" onclick="openModal();currentSlide(1)">
         }
     </div>
     <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Address)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Address)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Address)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Description)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Description)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Price)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Price)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Status)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Status)</dd>
         @if (Model.OwnerUser != null)
         {
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.OwnerUser.FirstName)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.OwnerUser.FirstName)
-            </dd>
+            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.OwnerUser.Email)</dt>
+            <dd class="col-sm-10">@Html.DisplayFor(model => model.OwnerUser.Email)</dd>
         }
     </dl>
+
+    <!-- Dynamiczne akcje -->
     @if (!isOwner)
     {
         @if (User.Identity.IsAuthenticated)
@@ -62,10 +48,15 @@
             <a asp-action="Login" asp-controller="Account" class="btn btn-primary">Log in to Add Reservation</a>
         }
     }
+    else
+    {
+        <a asp-action="Edit" asp-route-id="@Model.PropertyId" class="btn btn-info">Edit Property Details</a>
+    }
 
-    <!-- Home Button -->
+    <!-- Powrót -->
     <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Home</a>
 </div>
+
 
 <!-- The Modal/Lightbox -->
 <div id="propertyModal" class="modal">
@@ -73,7 +64,7 @@
     <div class="modal-content">
         @if (!string.IsNullOrEmpty((string)ViewData["MainImageUrl"]))
         {
-            <!-- Main Image -->
+            <!-- Główne zdjęcie -->
             <div class="mySlides">
                 <div class="numbertext">1 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) ? 1 : 0) + (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 1 : 0) + 1)</div>
                 <img src="@ViewData["MainImageUrl"]" style="width:100%">
@@ -82,7 +73,7 @@
 
         @if (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]))
         {
-            <!-- Additional Image 1 -->
+            <!-- Dodatkowe zdjęcie 1 -->
             <div class="mySlides">
                 <div class="numbertext">2 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) ? 1 : 0) + (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 1 : 0) + 1)</div>
                 <img src="@ViewData["AdditionalImageUrl1"]" style="width:100%">
@@ -91,14 +82,14 @@
 
         @if (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]))
         {
-            <!-- Additional Image 2 -->
+            <!-- Dodatkowe zdjęcie 2 -->
             <div class="mySlides">
                 <div class="numbertext">3 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) ? 1 : 0) + (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 1 : 0) + 1)</div>
                 <img src="@ViewData["AdditionalImageUrl2"]" style="width:100%">
             </div>
         }
 
-        <!-- Next/previous controls -->
+        <!-- Kontrola następny/poprzedni -->
         @if ((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) || !string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"])))
         {
             <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
@@ -109,12 +100,12 @@
 
 @section Scripts {
     <script>
-        // Open the Modal
+        // Otwarcie modala
         function openModal() {
             document.getElementById("propertyModal").style.display = "block";
         }
 
-        // Close the Modal
+        // Zamknięcie modala
         function closeModal() {
             document.getElementById("propertyModal").style.display = "none";
         }
@@ -122,12 +113,12 @@
         var slideIndex = 1;
         showSlides(slideIndex);
 
-        // Next/previous controls
+        // Kontrola następny/poprzedni
         function plusSlides(n) {
             showSlides(slideIndex += n);
         }
 
-        // Thumbnail image controls
+        // Kontrola miniatur
         function currentSlide(n) {
             showSlides(slideIndex = n);
         }
@@ -147,7 +138,7 @@
     </script>
 
     <style>
-        /* The Modal (background) */
+        /* Styl modala */
         .modal {
             display: none;
             position: fixed;
@@ -161,7 +152,6 @@
             background-color: rgba(0, 0, 0, 0.9);
         }
 
-        /* Modal Content */
         .modal-content {
             position: relative;
             margin: auto;
@@ -170,7 +160,6 @@
             max-width: 700px;
         }
 
-        /* The Close Button */
         .close {
             position: absolute;
             top: 15px;
@@ -181,49 +170,27 @@
             transition: 0.3s;
         }
 
-            .close:hover,
-            .close:focus {
-                color: #bbb;
-                text-decoration: none;
-                cursor: pointer;
-            }
-
         .mySlides {
             display: none;
         }
 
-        .prev,
-        .next {
+        .prev, .next {
             cursor: pointer;
             position: absolute;
             top: 50%;
-            width: auto;
             padding: 16px;
-            margin-top: -22px;
             color: #fff;
             font-weight: bold;
             font-size: 18px;
             transition: 0.6s ease;
-            border-radius: 0 3px 3px 0;
-            user-select: none;
+        }
+
+        .prev {
+            left: 0;
         }
 
         .next {
             right: 0;
-            border-radius: 3px 0 0 3px;
-        }
-
-            .prev:hover,
-            .next:hover {
-                background-color: rgba(0, 0, 0, 0.8);
-            }
-
-        .numbertext {
-            color: #f2f2f2;
-            font-size: 12px;
-            padding: 8px 12px;
-            position: absolute;
-            top: 0;
         }
 
         img.thumbnail {

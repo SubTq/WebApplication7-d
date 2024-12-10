@@ -17,6 +17,10 @@ namespace WebApplication7.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique(); // Ensure unique email addresses
+
             modelBuilder.Entity<Property>()
                 .Property(p => p.Price)
                 .HasColumnType("decimal(18,2)");
@@ -46,5 +50,6 @@ namespace WebApplication7.Data
                 .WithMany(u => u.Reservations)
                 .HasForeignKey(r => r.UserId);
         }
+
     }
 }

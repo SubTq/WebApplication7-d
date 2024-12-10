@@ -10,7 +10,6 @@
 
 <h2 class="text-center">Login</h2>
 
-<!-- Sekcja wyświetlania błędu -->
 @if (ViewData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger text-center">
@@ -24,13 +23,17 @@
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <div class="form-group text-center">
-        <a asp-action="Register" asp-controller="Account">Register as new user</a>
-    </div>
     <div class="form-group">
         <label asp-for="Password" class="control-label"></label>
         <input asp-for="Password" class="form-control" type="password" />
         <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input asp-for="RememberMe" type="checkbox" />
+        <label asp-for="RememberMe">Remember Me</label>
+    </div>
+    <div class="form-group text-center">
+        <a asp-action="Register" asp-controller="Account">Register as new user</a>
     </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Login</button>
