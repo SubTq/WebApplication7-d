@@ -19,6 +19,10 @@
         {
             <img src="@ViewData["MainImageUrl"]" alt="Main Property Image" class="thumbnail" onclick="openModal();currentSlide(1)">
         }
+        else
+        {
+            <img src="https://example.com/default-image.jpg" alt="Default Property Image" class="thumbnail">
+        }
     </div>
     <dl class="row">
         <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Address)</dt>
@@ -31,8 +35,13 @@
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Status)</dd>
         @if (Model.OwnerUser != null)
         {
-            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.OwnerUser.Email)</dt>
+            <dt class="col-sm-2">Owner Email</dt>
             <dd class="col-sm-10">@Html.DisplayFor(model => model.OwnerUser.Email)</dd>
+        }
+        else
+        {
+            <dt class="col-sm-2">Owner Email</dt>
+            <dd class="col-sm-10">Unknown Owner</dd>
         }
     </dl>
 
@@ -57,34 +66,37 @@
     <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Home</a>
 </div>
 
-
 <!-- The Modal/Lightbox -->
 <div id="propertyModal" class="modal">
     <span class="close cursor" onclick="closeModal()">&times;</span>
     <div class="modal-content">
         @if (!string.IsNullOrEmpty((string)ViewData["MainImageUrl"]))
         {
-            <!-- Główne zdjęcie -->
             <div class="mySlides">
                 <div class="numbertext">1 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) ? 1 : 0) + (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 1 : 0) + 1)</div>
                 <img src="@ViewData["MainImageUrl"]" style="width:100%">
             </div>
         }
+        else
+        {
+            <div class="mySlides">
+                <div class="numbertext">1 / 1</div>
+                <img src="https://example.com/default-image.jpg" style="width:100%">
+            </div>
+        }
 
         @if (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]))
         {
-            <!-- Dodatkowe zdjęcie 1 -->
             <div class="mySlides">
-                <div class="numbertext">2 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) ? 1 : 0) + (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 1 : 0) + 1)</div>
+                <div class="numbertext">2 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 3 : 2))</div>
                 <img src="@ViewData["AdditionalImageUrl1"]" style="width:100%">
             </div>
         }
 
         @if (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]))
         {
-            <!-- Dodatkowe zdjęcie 2 -->
             <div class="mySlides">
-                <div class="numbertext">3 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) ? 1 : 0) + (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 1 : 0) + 1)</div>
+                <div class="numbertext">3 / 3</div>
                 <img src="@ViewData["AdditionalImageUrl2"]" style="width:100%">
             </div>
         }
@@ -100,12 +112,10 @@
 
 @section Scripts {
     <script>
-        // Otwarcie modala
         function openModal() {
             document.getElementById("propertyModal").style.display = "block";
         }
 
-        // Zamknięcie modala
         function closeModal() {
             document.getElementById("propertyModal").style.display = "none";
         }
@@ -113,12 +123,10 @@
         var slideIndex = 1;
         showSlides(slideIndex);
 
-        // Kontrola następny/poprzedni
         function plusSlides(n) {
             showSlides(slideIndex += n);
         }
 
-        // Kontrola miniatur
         function currentSlide(n) {
             showSlides(slideIndex = n);
         }
@@ -136,9 +144,7 @@
             }
         }
     </script>
-
     <style>
-        /* Styl modala */
         .modal {
             display: none;
             position: fixed;
@@ -153,7 +159,6 @@
         }
 
         .modal-content {
-            position: relative;
             margin: auto;
             padding: 0;
             width: 80%;
@@ -166,8 +171,6 @@
             right: 25px;
             color: #fff;
             font-size: 35px;
-            font-weight: bold;
-            transition: 0.3s;
         }
 
         .mySlides {
@@ -178,30 +181,13 @@
             cursor: pointer;
             position: absolute;
             top: 50%;
-            padding: 16px;
             color: #fff;
-            font-weight: bold;
             font-size: 18px;
-            transition: 0.6s ease;
-        }
-
-        .prev {
-            left: 0;
-        }
-
-        .next {
-            right: 0;
         }
 
         img.thumbnail {
             cursor: pointer;
-            width: 100%;
             max-width: 400px;
-            transition: transform 0.2s;
         }
-
-            img.thumbnail:hover {
-                transform: scale(1.05);
-            }
     </style>
 }

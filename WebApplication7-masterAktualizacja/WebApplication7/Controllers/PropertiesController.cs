@@ -87,18 +87,25 @@ namespace WebApplication7.Controllers
                 return NotFound();
             }
 
+            // Debugging: Log wszystkie wartości
+            _logger.LogInformation("Property Data: {@Property}", property);
+
             var currentUserEmail = User.Identity?.Name;
 
+            // Obsługa sytuacji, gdy wartości są `NULL`
             ViewData["IsOwner"] = property.OwnerUser?.Email == currentUserEmail;
             ViewData["CurrentUserEmail"] = currentUserEmail;
-            ViewData["OwnerEmail"] = property.OwnerUser?.Email;
+            ViewData["OwnerEmail"] = property.OwnerUser?.Email ?? "Unknown";
 
-            ViewData["MainImageUrl"] = !string.IsNullOrEmpty(property.ImageUrl) ? property.ImageUrl : null;
+            ViewData["MainImageUrl"] = !string.IsNullOrEmpty(property.ImageUrl) ? property.ImageUrl : "https://example.com/default-image.jpg";
             ViewData["AdditionalImageUrl1"] = !string.IsNullOrEmpty(property.AdditionalImageUrl1) ? property.AdditionalImageUrl1 : null;
             ViewData["AdditionalImageUrl2"] = !string.IsNullOrEmpty(property.AdditionalImageUrl2) ? property.AdditionalImageUrl2 : null;
 
             return View(property);
         }
+
+
+
 
         // GET: Properties/MyProperties
         public async Task<IActionResult> MyProperties()

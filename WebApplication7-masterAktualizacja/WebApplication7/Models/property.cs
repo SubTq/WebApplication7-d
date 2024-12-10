@@ -25,23 +25,21 @@ namespace WebApplication7.Models
         public User? OwnerUser { get; set; }
 
         [Phone]
-        public string ContactNumber { get; set; } = string.Empty;
+        public string? ContactNumber { get; set; } // Zmienione na nullable
 
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; } // Zmienione na nullable
 
-        // Wymagany główny obraz z bardziej elastyczną walidacją URL
         [Required(ErrorMessage = "Main image URL is required.")]
         [RegularExpression(@"^(https?:\/\/)[\w\-]+(\.[\w\-]+)+(:\d+)?(\/[\w\-\.]*)*(\?.*)?$", ErrorMessage = "Please enter a valid URL starting with http:// or https://.")]
-        public string ImageUrl { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = "https://example.com/default-image.jpg";
 
-        // Opcjonalny pierwszy dodatkowy obraz z walidacją URL
         [RegularExpression(@"^(https?:\/\/)[\w\-]+(\.[\w\-]+)+(:\d+)?(\/[\w\-\.]*)*(\?.*)?$", ErrorMessage = "Please enter a valid URL starting with http:// or https://.")]
-        public string? AdditionalImageUrl1 { get; set; }
+        public string? AdditionalImageUrl1 { get; set; } = null;
 
-        // Opcjonalny drugi dodatkowy obraz z walidacją URL
         [RegularExpression(@"^(https?:\/\/)[\w\-]+(\.[\w\-]+)+(:\d+)?(\/[\w\-\.]*)*(\?.*)?$", ErrorMessage = "Please enter a valid URL starting with http:// or https://.")]
-        public string? AdditionalImageUrl2 { get; set; }
+        public string? AdditionalImageUrl2 { get; set; } = null;
 
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }
+
 }
