@@ -22,6 +22,7 @@
                     <div class="menu-items" id="menuItems">
                         @if (User.Identity.IsAuthenticated)
                         {
+                            <a asp-area="" asp-controller="Account" asp-action="Profile">My Profile</a>
                             <a asp-area="" asp-controller="Properties" asp-action="MyProperties">My Properties</a>
                             <a asp-area="" asp-controller="Properties" asp-action="Create">Add Property</a>
                             <a asp-area="" asp-controller="Reservations" asp-action="MyReservations">My Reservations</a>
@@ -33,6 +34,7 @@
                             <a asp-area="" asp-controller="Account" asp-action="Login">Login</a>
                             <a asp-area="" asp-controller="Account" asp-action="Register">Register</a>
                         }
+
                     </div>
                 </div>
             </div>
@@ -40,8 +42,22 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
             @RenderBody()
         </main>
+
     </div>
 
     <footer class="border-top footer text-muted">

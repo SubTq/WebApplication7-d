@@ -76,7 +76,8 @@ namespace WebApplication7.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Property not found.";
+                return RedirectToAction("Index");
             }
 
             var property = await _context.Properties
@@ -85,23 +86,22 @@ namespace WebApplication7.Controllers
 
             if (property == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Property not found.";
+                return RedirectToAction("Index");
             }
 
-            _logger.LogInformation("Property Data: {@Property}", property);
-
             var currentUserEmail = User.Identity?.Name;
-
             ViewData["IsOwner"] = property.OwnerUser?.Email == currentUserEmail;
             ViewData["CurrentUserEmail"] = currentUserEmail;
             ViewData["OwnerEmail"] = property.OwnerUser?.Email ?? "Unknown";
 
-            ViewData["MainImageUrl"] = !string.IsNullOrEmpty(property.ImageUrl) ? property.ImageUrl : "https://example.com/default-image.jpg";
+            ViewData["MainImageUrl"] = !string.IsNullOrEmpty(property.ImageUrl) ? property.ImageUrl : "https://via.placeholder.com/150";
             ViewData["AdditionalImageUrl1"] = !string.IsNullOrEmpty(property.AdditionalImageUrl1) ? property.AdditionalImageUrl1 : null;
             ViewData["AdditionalImageUrl2"] = !string.IsNullOrEmpty(property.AdditionalImageUrl2) ? property.AdditionalImageUrl2 : null;
 
             return View(property);
         }
+
 
         // GET: Properties/MyProperties
         public async Task<IActionResult> MyProperties()
@@ -205,23 +205,34 @@ namespace WebApplication7.Controllers
 
         // GET: Properties/Edit/5
         [Authorize]
-   
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Property not found.";
+                return RedirectToAction("Index", "Home");
             }
 
-            var property = await _context.Properties.FindAsync(id);
+            var property = await _context.Properties
+                .Include(p => p.OwnerUser)
+                .FirstOrDefaultAsync(p => p.PropertyId == id);
+
             if (property == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Property not found.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var currentUserEmail = User.Identity?.Name;
+
+            if (property.OwnerUser?.Email != currentUserEmail)
+            {
+                TempData["ErrorMessage"] = "You are not authorized to edit this property.";
+                return RedirectToAction("Index", "Home");
             }
 
             return View(property);
         }
-
 
         // POST: Properties/Edit/5
         [HttpPost]
@@ -231,28 +242,35 @@ namespace WebApplication7.Controllers
         {
             if (id != property.PropertyId)
             {
-                _logger.LogWarning("Edit POST: Mismatched ID. URL ID: {Id}, Model ID: {PropertyId}", id, property.PropertyId);
-                return NotFound();
+                TempData["ErrorMessage"] = "Invalid property ID.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var currentUserEmail = User.Identity?.Name;
+            var existingProperty = await _context.Properties
+                .Include(p => p.OwnerUser)
+                .FirstOrDefaultAsync(p => p.PropertyId == id);
+
+            if (existingProperty == null)
+            {
+                TempData["ErrorMessage"] = "Property not found.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (existingProperty.OwnerUser?.Email != currentUserEmail)
+            {
+                TempData["ErrorMessage"] = "You are not authorized to edit this property.";
+                return RedirectToAction("Index", "Home");
             }
 
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Edit POST: ModelState is invalid. Errors: {Errors}", ModelState.Values.SelectMany(v => v.Errors));
-                ViewData["ErrorMessage"] = "Please correct the errors and try again.";
+                TempData["ErrorMessage"] = "Please correct the errors and try again.";
                 return View(property);
             }
 
             try
             {
-                var currentUserEmail = User.Identity.Name;
-                var existingProperty = await _context.Properties.Include(p => p.OwnerUser).FirstOrDefaultAsync(p => p.PropertyId == id);
-
-                if (existingProperty == null || existingProperty.OwnerUser?.Email != currentUserEmail)
-                {
-                    _logger.LogWarning("Edit POST: Unauthorized attempt by {Email} on property ID {Id}.", currentUserEmail, id);
-                    return Forbid();
-                }
-
                 existingProperty.Address = property.Address;
                 existingProperty.Type = property.Type;
                 existingProperty.Price = property.Price;
@@ -263,35 +281,31 @@ namespace WebApplication7.Controllers
                 existingProperty.AdditionalImageUrl1 = property.AdditionalImageUrl1;
                 existingProperty.AdditionalImageUrl2 = property.AdditionalImageUrl2;
 
-                // Dodanie loga dla OwnerUserId
-                _logger.LogInformation("OwnerUserId podczas edycji: {OwnerUserId}", property.OwnerUserId);
-
                 _context.Update(existingProperty);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Edit POST: Successfully updated property ID {Id}.", id);
-                ViewData["SuccessMessage"] = "Property updated successfully.";
+                TempData["SuccessMessage"] = "Property updated successfully.";
                 return RedirectToAction(nameof(MyProperties));
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateConcurrencyException)
             {
                 if (!PropertyExists(property.PropertyId))
                 {
-                    _logger.LogError("Edit POST: Property ID {Id} does not exist. Exception: {Exception}", property.PropertyId, ex);
-                    return NotFound();
+                    TempData["ErrorMessage"] = "Property not found.";
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {
-                    _logger.LogError("Edit POST: Concurrency issue while updating property ID {Id}. Exception: {Exception}", property.PropertyId, ex);
                     throw;
                 }
             }
         }
 
-    
 
 
-    private bool PropertyExists(int id)
+
+
+        private bool PropertyExists(int id)
         {
             return _context.Properties.Any(e => e.PropertyId == id);
         }

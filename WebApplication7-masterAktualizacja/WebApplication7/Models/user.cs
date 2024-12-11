@@ -19,7 +19,7 @@ namespace WebApplication7.Models
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        public string NormalizedEmail { get; set; }
+        public string? NormalizedEmail { get; set; } // Pole nie wymagane w formularzu edycji.
 
         [Required]
         [DataType(DataType.Password)]
@@ -27,6 +27,10 @@ namespace WebApplication7.Models
 
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpiry { get; set; }
+
+        
+        [Phone]
+        public string? ContactNumber { get; set; }
 
         public ICollection<Property> Properties { get; set; } = new List<Property>();
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
@@ -57,6 +61,4 @@ namespace WebApplication7.Models
             }
         }
     }
-
 }
-

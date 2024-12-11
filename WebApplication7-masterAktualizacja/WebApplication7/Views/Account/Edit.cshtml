@@ -1,0 +1,59 @@
+﻿@model WebApplication7.Models.EditUserModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<h1 class="mb-4">Edit Profile</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<form asp-action="Edit" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <!-- Imię -->
+    <div class="form-group">
+        <label asp-for="FirstName" class="form-label"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <!-- Nazwisko -->
+    <div class="form-group">
+        <label asp-for="LastName" class="form-label"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <!-- E-mail -->
+    <div class="form-group">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <!-- Numer kontaktowy -->
+    <div class="form-group">
+        <label asp-for="ContactNumber" class="form-label"></label>
+        <input asp-for="ContactNumber" class="form-control" />
+        <span asp-validation-for="ContactNumber" class="text-danger"></span>
+    </div>
+
+    <!-- Ukryte pola -->
+    <input type="hidden" asp-for="UserId" />
+
+    <!-- Przyciski -->
+    <div class="form-group mt-4">
+        <input type="submit" value="Save" class="btn btn-primary" />
+        <a asp-action="Profile" class="btn btn-secondary">Cancel</a>
+        <a asp-action="Index" asp-controller="Home" class="btn btn-info">Home</a>
+    </div>
+</form>

@@ -1,0 +1,29 @@
+﻿@model WebApplication7.Models.User
+
+@{
+    ViewData["Title"] = "User Profile";
+}
+
+<h1 class="mb-4">User Profile</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div>
+    <p><strong>First Name:</strong> @Model.FirstName</p>
+    <p><strong>Last Name:</strong> @Model.LastName</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Contact Number:</strong> @Model.ContactNumber</p>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Edit" class="btn btn-primary">Edit Profile</a>
+    <a asp-action="Index" asp-controller="Home" class="btn btn-info">Home</a>
+</div>

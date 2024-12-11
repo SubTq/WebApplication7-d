@@ -4,9 +4,9 @@
     ViewData["Title"] = "Edit Property";
 }
 
-<h1>Edit Property</h1>
+<h1 class="mb-4">Edit Property</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="All" class="alert alert-danger"></div>
 
 <h4>Property Details</h4>
 <hr />
@@ -24,8 +24,9 @@
                 @ViewData["SuccessMessage"]
             </div>
         }
+
         <form asp-action="Edit" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
             <!-- Address -->
             <div class="form-group">
@@ -96,16 +97,14 @@
                 <img id="additionalImagePreview2" src="@Model.AdditionalImageUrl2 ?? 'https://via.placeholder.com/150'" alt="Additional Image 2 Preview" class="img-thumbnail mt-3" />
             </div>
 
-            <!-- Hidden Field for PropertyId -->
+            <!-- Hidden Fields -->
             <input type="hidden" asp-for="PropertyId" />
-
-            <!-- Hidden Field for OwnerUserId -->
             <input type="hidden" asp-for="OwnerUserId" />
 
-            <!-- Submit -->
-            <div class="form-group">
+            <!-- Submit and Cancel Buttons -->
+            <div class="form-group mt-4">
                 <input type="submit" value="Save" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                <a asp-action="Details" asp-route-id="@Model.PropertyId" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
@@ -126,7 +125,5 @@
             }
         }
     </script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @Html.Partial("_ValidationScriptsPartial")
 }

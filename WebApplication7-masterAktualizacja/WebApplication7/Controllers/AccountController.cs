@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication7.Controllers
 {
@@ -243,6 +244,7 @@ namespace WebApplication7.Controllers
                     smtpClient.EnableSsl = true;
                     smtpClient.Send(mailMessage);
                 }
+                _logger.LogInformation($"Password reset email successfully sent to {toEmail}");
             }
             catch (Exception ex)
             {
@@ -250,6 +252,132 @@ namespace WebApplication7.Controllers
             }
         }
 
+
+        // GET: Account/Profile
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var userEmail = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return NotFound("User not found.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return View(user);
+        }
+
+        // GET: Account/Edit
+        [Authorize]
+        public async Task<IActionResult> Edit()
+        {
+            var userEmail = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return NotFound("User not found.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var editModel = new EditUserModel
+            {
+                UserId = user.UserId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                ContactNumber = user.ContactNumber
+            };
+
+            return View(editModel);
+        }
+
+
+        // POST: Account/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> Edit(EditUserModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Nieprawidłowy stan modelu podczas edycji profilu.");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("Błąd walidacji: {ErrorMessage}", error.ErrorMessage);
+                }
+                return View(model);
+            }
+
+            try
+            {
+                var currentUserEmail = User.Identity?.Name;
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
+
+                if (existingUser == null || existingUser.UserId != model.UserId)
+                {
+                    _logger.LogWarning("Nieautoryzowana próba edycji profilu przez {Email}.", currentUserEmail);
+                    return Unauthorized("Nieautoryzowany dostęp.");
+                }
+
+                // Sprawdź unikalność e-maila, jeśli został zmieniony
+                if (!string.Equals(existingUser.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    var emailExists = await _context.Users.AnyAsync(u => u.Email == model.Email);
+                    if (emailExists)
+                    {
+                        ModelState.AddModelError("Email", "Ten adres e-mail jest już zarejestrowany.");
+                        return View(model);
+                    }
+                }
+
+                // Zaktualizuj dane użytkownika
+                existingUser.FirstName = model.FirstName;
+                existingUser.LastName = model.LastName;
+                existingUser.ContactNumber = model.ContactNumber;
+                existingUser.Email = model.Email;
+                existingUser.NormalizedEmail = model.Email.Trim().ToUpperInvariant();
+
+                _context.Update(existingUser);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Profil został pomyślnie zaktualizowany dla {Email}.", existingUser.Email);
+                TempData["SuccessMessage"] = "Twój profil został pomyślnie zaktualizowany.";
+                return RedirectToAction(nameof(Profile));
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Wystąpił błąd współbieżności podczas aktualizacji profilu użytkownika.");
+                ModelState.AddModelError("", "Wystąpił błąd podczas aktualizacji Twojego profilu. Spróbuj ponownie.");
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Wystąpił nieoczekiwany błąd podczas aktualizacji profilu użytkownika.");
+                ModelState.AddModelError("", "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.");
+                return View(model);
+            }
+        }
+
+
+
+
     }
+
 }
+
+
+
 
