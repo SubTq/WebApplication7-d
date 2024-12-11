@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
@@ -87,12 +88,10 @@ namespace WebApplication7.Controllers
                 return NotFound();
             }
 
-            // Debugging: Log wszystkie wartości
             _logger.LogInformation("Property Data: {@Property}", property);
 
             var currentUserEmail = User.Identity?.Name;
 
-            // Obsługa sytuacji, gdy wartości są `NULL`
             ViewData["IsOwner"] = property.OwnerUser?.Email == currentUserEmail;
             ViewData["CurrentUserEmail"] = currentUserEmail;
             ViewData["OwnerEmail"] = property.OwnerUser?.Email ?? "Unknown";
@@ -103,9 +102,6 @@ namespace WebApplication7.Controllers
 
             return View(property);
         }
-
-
-
 
         // GET: Properties/MyProperties
         public async Task<IActionResult> MyProperties()
@@ -202,7 +198,100 @@ namespace WebApplication7.Controllers
             return View(property);
         }
 
-        private bool PropertyExists(int id)
+        private void PopulateStatusList(string selectedStatus = null)
+        {
+            ViewBag.StatusList = new SelectList(new[] { "Available", "Rented", "Under Maintenance" }, selectedStatus);
+        }
+
+        // GET: Properties/Edit/5
+        [Authorize]
+   
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var property = await _context.Properties.FindAsync(id);
+            if (property == null)
+            {
+                return NotFound();
+            }
+
+            return View(property);
+        }
+
+
+        // POST: Properties/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, [Bind("PropertyId,Address,Type,Price,Status,ContactNumber,Description,ImageUrl,AdditionalImageUrl1,AdditionalImageUrl2,OwnerUserId")] Property property)
+        {
+            if (id != property.PropertyId)
+            {
+                _logger.LogWarning("Edit POST: Mismatched ID. URL ID: {Id}, Model ID: {PropertyId}", id, property.PropertyId);
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Edit POST: ModelState is invalid. Errors: {Errors}", ModelState.Values.SelectMany(v => v.Errors));
+                ViewData["ErrorMessage"] = "Please correct the errors and try again.";
+                return View(property);
+            }
+
+            try
+            {
+                var currentUserEmail = User.Identity.Name;
+                var existingProperty = await _context.Properties.Include(p => p.OwnerUser).FirstOrDefaultAsync(p => p.PropertyId == id);
+
+                if (existingProperty == null || existingProperty.OwnerUser?.Email != currentUserEmail)
+                {
+                    _logger.LogWarning("Edit POST: Unauthorized attempt by {Email} on property ID {Id}.", currentUserEmail, id);
+                    return Forbid();
+                }
+
+                existingProperty.Address = property.Address;
+                existingProperty.Type = property.Type;
+                existingProperty.Price = property.Price;
+                existingProperty.Status = property.Status;
+                existingProperty.ContactNumber = property.ContactNumber;
+                existingProperty.Description = property.Description;
+                existingProperty.ImageUrl = property.ImageUrl;
+                existingProperty.AdditionalImageUrl1 = property.AdditionalImageUrl1;
+                existingProperty.AdditionalImageUrl2 = property.AdditionalImageUrl2;
+
+                // Dodanie loga dla OwnerUserId
+                _logger.LogInformation("OwnerUserId podczas edycji: {OwnerUserId}", property.OwnerUserId);
+
+                _context.Update(existingProperty);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Edit POST: Successfully updated property ID {Id}.", id);
+                ViewData["SuccessMessage"] = "Property updated successfully.";
+                return RedirectToAction(nameof(MyProperties));
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (!PropertyExists(property.PropertyId))
+                {
+                    _logger.LogError("Edit POST: Property ID {Id} does not exist. Exception: {Exception}", property.PropertyId, ex);
+                    return NotFound();
+                }
+                else
+                {
+                    _logger.LogError("Edit POST: Concurrency issue while updating property ID {Id}. Exception: {Exception}", property.PropertyId, ex);
+                    throw;
+                }
+            }
+        }
+
+    
+
+
+    private bool PropertyExists(int id)
         {
             return _context.Properties.Any(e => e.PropertyId == id);
         }

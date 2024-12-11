@@ -7,27 +7,32 @@ namespace WebApplication7.Models
     {
         public int PropertyId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Address is required.")]
+        [MaxLength(255, ErrorMessage = "Address cannot exceed 255 characters.")]
         public string Address { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Type is required.")]
+        [MaxLength(100, ErrorMessage = "Type cannot exceed 100 characters.")]
         public string Type { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Price is required.")]
+        [Range(0, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
         [DataType(DataType.Currency)]
         public decimal Price { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Status is required.")]
+        [MaxLength(50, ErrorMessage = "Status cannot exceed 50 characters.")]
         public string Status { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Owner is required.")]
         public int OwnerUserId { get; set; }
         public User? OwnerUser { get; set; }
 
-        [Phone]
-        public string? ContactNumber { get; set; } // Zmienione na nullable
+        [Phone(ErrorMessage = "Please enter a valid phone number.")]
+        public string? ContactNumber { get; set; } // Nullable
 
-        public string? Description { get; set; } // Zmienione na nullable
+        [MaxLength(1000, ErrorMessage = "Description cannot exceed 1000 characters.")]
+        public string? Description { get; set; } // Nullable
 
         [Required(ErrorMessage = "Main image URL is required.")]
         [RegularExpression(@"^(https?:\/\/)[\w\-]+(\.[\w\-]+)+(:\d+)?(\/[\w\-\.]*)*(\?.*)?$", ErrorMessage = "Please enter a valid URL starting with http:// or https://.")]
@@ -41,5 +46,4 @@ namespace WebApplication7.Models
 
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }
-
 }

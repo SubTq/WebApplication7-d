@@ -7,9 +7,6 @@
 
 <h2>Property Details</h2>
 
-<!-- Diagnostyka -->
-<p><strong>Current User Email:</strong> @ViewData["CurrentUserEmail"]</p>
-<p><strong>Owner Email:</strong> @ViewData["OwnerEmail"]</p>
 
 <div>
     <hr />
@@ -163,6 +160,7 @@
             padding: 0;
             width: 80%;
             max-width: 700px;
+            position: relative;
         }
 
         .close {
@@ -171,23 +169,56 @@
             right: 25px;
             color: #fff;
             font-size: 35px;
+            cursor: pointer;
         }
 
         .mySlides {
             display: none;
+            text-align: center;
         }
+
+            .mySlides img {
+                margin: auto;
+                max-width: 100%;
+                max-height: 80vh;
+                display: block;
+            }
 
         .prev, .next {
             cursor: pointer;
             position: absolute;
             top: 50%;
+            transform: translateY(-50%);
+            padding: 16px;
             color: #fff;
-            font-size: 18px;
+            font-size: 24px;
+            font-weight: bold;
+            user-select: none;
+            transition: 0.3s;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
         }
+
+        .prev {
+            left: 15px;
+        }
+
+        .next {
+            right: 15px;
+        }
+
+            .prev:hover, .next:hover {
+                background-color: rgba(0, 0, 0, 0.8);
+            }
 
         img.thumbnail {
             cursor: pointer;
             max-width: 400px;
+            transition: transform 0.2s;
         }
+
+            img.thumbnail:hover {
+                transform: scale(1.05);
+            }
     </style>
 }

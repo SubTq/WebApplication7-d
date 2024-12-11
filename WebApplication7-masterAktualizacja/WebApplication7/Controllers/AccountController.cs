@@ -227,7 +227,7 @@ namespace WebApplication7.Controllers
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress("no-reply@RentHouse.com"),
+                From = new MailAddress("houserentproject@gmail.com", "RentHouse Support"),
                 Subject = "Reset Password",
                 Body = $"Click the link to reset your password: <a href='{resetLink}'>Reset Password</a>",
                 IsBodyHtml = true
@@ -236,9 +236,10 @@ namespace WebApplication7.Controllers
 
             try
             {
-                using (var smtpClient = new SmtpClient("smtp.your-email-provider.com"))
+                using (var smtpClient = new SmtpClient("smtp.gmail.com"))
                 {
-                    smtpClient.Credentials = new System.Net.NetworkCredential("your-email", "your-password");
+                    smtpClient.Port = 587;
+                    smtpClient.Credentials = new System.Net.NetworkCredential("houserentproject@gmail.com", "nzse ndli tcnm lljo");
                     smtpClient.EnableSsl = true;
                     smtpClient.Send(mailMessage);
                 }
@@ -246,8 +247,9 @@ namespace WebApplication7.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to send reset email to {toEmail}: {ex.Message}");
-                throw;
             }
         }
+
     }
 }
+
