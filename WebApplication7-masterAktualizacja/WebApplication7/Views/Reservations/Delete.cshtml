@@ -46,6 +46,6 @@
 
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="ReservationId" />
-    <input type="submit" value="Delete" class="btn btn-danger" /> |
-    <a asp-action="Index">Back to List</a>
+    <input type="submit" value="Delete" class="btn btn-danger" />
+    <button type="button" class="btn btn-secondary" onclick="history.back()">Back</button>
 </form>

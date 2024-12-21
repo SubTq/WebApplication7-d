@@ -17,10 +17,16 @@
             @Html.DisplayFor(model => model.Property.Address)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.FirstName)
+            Owner Email
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.FirstName)
+            @Model.Property?.OwnerUser?.Email 
+        </dd>
+        <dt class="col-sm-2">
+            Contact Number
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Property?.OwnerUser?.ContactNumber 
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.StartDate)
@@ -43,6 +49,6 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.ReservationId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model.ReservationId" class="btn btn-primary">Edit</a>
+    <a asp-action="MyReservations" asp-controller="Reservations" class="btn btn-secondary">Back to My Reservations</a>
 </div>

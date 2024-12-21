@@ -29,7 +29,9 @@ namespace WebApplication7.Models
         public DateTime EndDate { get; set; }
 
         [Required]
-        public string Status { get; set; }
+        public string Status { get; set; } = "Pending";
+
+        public string? OwnerNote { get; set; } = ""; 
     }
 
     public class CurrentOrFutureDateAttribute : ValidationAttribute

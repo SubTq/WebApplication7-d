@@ -4,21 +4,69 @@
     ViewData["Title"] = "My Properties";
 }
 
-<h2>My Properties</h2>
+<h2 class="mb-4">My Properties</h2>
 
-<div class="row">
+<div class="container">
     @foreach (var property in Model)
     {
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <img class="card-img-top" src="@property.ImageUrl" alt="Property image">
-                <div class="card-body">
-                    <h5 class="card-title">@property.Address</h5>
-                    <p class="card-text">@property.Description</p>
-                    <p class="card-text"><strong>Price:</strong> @property.Price.ToString("C")</p>
-                    <a asp-action="Details" asp-controller="Properties" asp-route-id="@property.PropertyId" class="btn btn-primary">View Details</a>
-                    <a asp-action="Edit" asp-controller="Properties" asp-route-id="@property.PropertyId" class="btn btn-secondary">Edit</a>
-                    <a asp-action="Delete" asp-controller="Properties" asp-route-id="@property.PropertyId" class="btn btn-danger">Delete</a>
+        <div class="row mb-4">
+            <!-- Lewa kolumna: Szczegóły mieszkania -->
+            <div class="col-md-6">
+                <div class="card">
+                    <img src="@property.ImageUrl" class="card-img-top" alt="Property image">
+                    <div class="card-body">
+                        <h5 class="card-title">@property.Address</h5>
+                        <p class="card-text">@property.Description</p>
+                        <p class="card-text"><strong>Price:</strong> @property.Price.ToString("C")</p>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@property.PropertyId" class="btn btn-primary">Details</a>
+                            <a asp-action="Edit" asp-route-id="@property.PropertyId" class="btn btn-secondary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@property.PropertyId" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prawa kolumna: Rezerwacje -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        Reservations for @property.Address
+                    </div>
+                    <div class="card-body">
+                        @if (property.Reservations != null && property.Reservations.Any())
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Reservation ID</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var reservation in property.Reservations)
+                                    {
+                                        <tr>
+                                            <td>@reservation.ReservationId</td>
+                                            <td>@reservation.StartDate.ToShortDateString()</td>
+                                            <td>@reservation.EndDate.ToShortDateString()</td>
+                                            <td>@reservation.Status</td>
+                                            <td>
+                                                <a asp-action="ManageReservation" asp-controller="Reservations" asp-route-id="@reservation.ReservationId" class="btn btn-primary btn-sm">Manage</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>No reservations for this property.</p>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
@@ -26,17 +74,30 @@
 </div>
 
 <style>
-    .text-center {
-        text-align: center;
+    .card {
+        margin-bottom: 2rem;
     }
 
-    .py-4 {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
+    .table {
+        margin-top: 1rem;
     }
 
-    .py-3 {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+    .card-header {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    .card-img-top {
+        max-height: 300px;
+        object-fit: cover;
+    }
+
+    .d-flex.gap-2 {
+        margin-top: 1rem;
+    }
+
+    .row {
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 20px;
     }
 </style>

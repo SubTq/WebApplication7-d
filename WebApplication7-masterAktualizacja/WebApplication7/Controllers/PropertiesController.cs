@@ -116,12 +116,15 @@ namespace WebApplication7.Controllers
 
             var properties = await _context.Properties
                 .Where(p => p.OwnerUser.Email == currentUserEmail)
-                .Include(p => p.OwnerUser)
+                .Include(p => p.Reservations) // Ważne: Dodanie Include
+                .ThenInclude(r => r.User)    // Opcjonalnie: Dodanie użytkownika
                 .ToListAsync();
 
             _logger.LogInformation("Retrieved {Count} properties for user {Email}", properties.Count, currentUserEmail);
             return View(properties);
         }
+
+
 
         // GET: Properties/Create
         [Authorize]
@@ -299,6 +302,25 @@ namespace WebApplication7.Controllers
                     throw;
                 }
             }
+
+
+        }
+
+        [Authorize]
+        public async Task<IActionResult> ManageReservations(int propertyId)
+        {
+            var currentUserEmail = User.Identity.Name;
+            var property = await _context.Properties
+                .Include(p => p.Reservations)
+                .ThenInclude(r => r.User)
+                .FirstOrDefaultAsync(p => p.PropertyId == propertyId && p.OwnerUser.Email == currentUserEmail);
+
+            if (property == null)
+            {
+                return NotFound("Property not found or unauthorized access.");
+            }
+
+            return View(property);
         }
 
 
