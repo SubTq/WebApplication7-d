@@ -43,8 +43,21 @@ namespace WebApplication7.Controllers
                 return NotFound("User not found.");
             }
 
-            int pageSize = 10; // Liczba elementów na stronę
-            int currentPage = pageNumber ?? 1; // Jeśli nie podano numeru strony, ustaw na 1
+            // Aktualizacja statusów zakończonych rezerwacji
+            var reservationsToUpdate = await _context.Reservations
+                .Where(r => r.UserId == user.UserId && r.EndDate < DateTime.Now && r.Status != "Zakończony")
+                .ToListAsync();
+
+            foreach (var reservation in reservationsToUpdate)
+            {
+                reservation.Status = "Zakończony";
+                _context.Update(reservation);
+            }
+            await _context.SaveChangesAsync();
+
+            // Pobieranie rezerwacji
+            int pageSize = 10;
+            int currentPage = pageNumber ?? 1;
 
             var reservations = await _context.Reservations
                 .Where(r => r.UserId == user.UserId)
@@ -63,6 +76,7 @@ namespace WebApplication7.Controllers
 
             return View(reservations);
         }
+
 
 
         // GET: Reservations/Create
@@ -169,13 +183,20 @@ namespace WebApplication7.Controllers
                 return NotFound();
             }
 
+            if (reservation.Status == "Zakończony")
+            {
+                TempData["ErrorMessage"] = "You cannot edit a reservation that has ended.";
+                return RedirectToAction(nameof(MyReservations));
+            }
+
             return View(reservation);
         }
+
 
         // POST: Reservations/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ReservationId,PropertyId,StartDate,EndDate,Status")] Reservation reservation)
+        public async Task<IActionResult> Edit(int id, [Bind("ReservationId,PropertyId,StartDate,EndDate,Status,UserId")] Reservation reservation)
         {
             if (id != reservation.ReservationId)
             {
@@ -186,6 +207,19 @@ namespace WebApplication7.Controllers
             {
                 try
                 {
+                    // Logowanie w celu śledzenia danych wejściowych
+                    _logger.LogInformation("Rozpoczęcie aktualizacji rezerwacji. Reservation ID: {ReservationId}, User ID: {UserId}, Property ID: {PropertyId}, StartDate: {StartDate}, EndDate: {EndDate}",
+                        reservation.ReservationId, reservation.UserId, reservation.PropertyId, reservation.StartDate, reservation.EndDate);
+
+                    // Walidacja UserId - czy użytkownik istnieje
+                    if (!_context.Users.Any(u => u.UserId == reservation.UserId))
+                    {
+                        _logger.LogWarning("Nieprawidłowy UserId: {UserId} dla rezerwacji ID: {ReservationId}", reservation.UserId, reservation.ReservationId);
+                        ModelState.AddModelError("UserId", "Nieprawidłowy identyfikator użytkownika.");
+                        return View(reservation);
+                    }
+
+                    // Sprawdzenie konfliktów w datach
                     var conflictingReservations = await _context.Reservations
                         .Where(r => r.PropertyId == reservation.PropertyId &&
                                     r.StartDate < reservation.EndDate &&
@@ -195,23 +229,35 @@ namespace WebApplication7.Controllers
 
                     if (conflictingReservations.Any())
                     {
+                        _logger.LogWarning("Konflikt rezerwacji. Reservation ID: {ReservationId}, Property ID: {PropertyId}, StartDate: {StartDate}, EndDate: {EndDate}",
+                            reservation.ReservationId, reservation.PropertyId, reservation.StartDate, reservation.EndDate);
+
                         ModelState.AddModelError("", "The property is already reserved during the selected dates.");
                         return View(reservation);
                     }
 
+                    // Aktualizacja rezerwacji
                     _context.Update(reservation);
                     await _context.SaveChangesAsync();
+
+                    _logger.LogInformation("Pomyślnie zaktualizowano rezerwację. Reservation ID: {ReservationId}", reservation.ReservationId);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ReservationExists(reservation.ReservationId))
                     {
+                        _logger.LogError("Nie znaleziono rezerwacji ID: {ReservationId} podczas aktualizacji.", reservation.ReservationId);
                         return NotFound();
                     }
+                    _logger.LogError("Błąd współbieżności podczas aktualizacji rezerwacji ID: {ReservationId}.", reservation.ReservationId);
                     throw;
                 }
+
                 return RedirectToAction(nameof(MyReservations));
             }
+
+            // Logowanie w przypadku nieprawidłowego ModelState
+            _logger.LogWarning("ModelState nie jest prawidłowy dla rezerwacji ID: {ReservationId}.", reservation.ReservationId);
             return View(reservation);
         }
 
@@ -219,6 +265,7 @@ namespace WebApplication7.Controllers
         {
             return _context.Reservations.Any(e => e.ReservationId == id);
         }
+
 
         // GET: Reservations/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -252,24 +299,30 @@ namespace WebApplication7.Controllers
             var reservation = await _context.Reservations.FindAsync(id);
             if (reservation == null)
             {
-                _logger.LogWarning("Delete POST action could not find reservation with id {Id}", id);
                 return NotFound();
+            }
+
+            if (reservation.Status == "Zakończony")
+            {
+                TempData["ErrorMessage"] = "You cannot delete a reservation that has ended.";
+                return RedirectToAction(nameof(MyReservations));
             }
 
             try
             {
                 _context.Reservations.Remove(reservation);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Reservation with id {Id} deleted successfully", id);
-                return RedirectToAction(nameof(Index));
+                _logger.LogInformation("Reservation ID {ReservationId} deleted successfully.", id);
+                return RedirectToAction(nameof(MyReservations));
             }
             catch (DbUpdateException ex)
             {
-                _logger.LogError(ex, "An error occurred while deleting the reservation with id {Id}", id);
-                ModelState.AddModelError("", "Unable to delete reservation. Try again, and if the problem persists, see your system administrator.");
-                return View(reservation);
+                _logger.LogError(ex, "An error occurred while deleting reservation ID {ReservationId}.", id);
+                TempData["ErrorMessage"] = "Unable to delete reservation.";
+                return RedirectToAction(nameof(MyReservations));
             }
         }
+
 
         // GET: Reservations/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -372,6 +425,31 @@ namespace WebApplication7.Controllers
             // Przekieruj użytkownika z powrotem do listy właściwości
             return RedirectToAction("MyProperties", "Properties");
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RateReservation(int reservationId, int rating)
+        {
+            var reservation = await _context.Reservations.FindAsync(reservationId);
+
+            if (reservation == null || reservation.Status != "Zakończony")
+            {
+                return BadRequest("Nie można ocenić tej rezerwacji.");
+            }
+
+            if (reservation.Rating != null)
+            {
+                return BadRequest("Rezerwacja została już oceniona.");
+            }
+
+            reservation.Rating = rating;
+            _context.Update(reservation);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(MyReservations));
+        }
+
+
 
     }
 }

@@ -31,22 +31,46 @@
 
             <div class="form-group">
                 <label asp-for="StartDate" class="control-label"></label>
-                <input asp-for="StartDate" class="form-control" />
+                @if (Model.Status == "Ended")
+                {
+                    <input asp-for="StartDate" class="form-control" readonly />
+                }
+                else
+                {
+                    <input asp-for="StartDate" class="form-control" />
+                }
                 <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="EndDate" class="control-label"></label>
-                <input asp-for="EndDate" class="form-control" />
+                @if (Model.Status == "Ended")
+                {
+                    <input asp-for="EndDate" class="form-control" readonly />
+                }
+                else
+                {
+                    <input asp-for="EndDate" class="form-control" />
+                }
                 <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Status" class="control-label"></label>
                 <input asp-for="Status" class="form-control" readonly />
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
+
+            @if (Model.Status != "Ended")
+            {
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">This reservation cannot be edited because it has ended.</p>
+            }
         </form>
     </div>
 </div>

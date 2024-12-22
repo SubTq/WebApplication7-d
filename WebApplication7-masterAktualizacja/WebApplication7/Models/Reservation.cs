@@ -31,7 +31,10 @@ namespace WebApplication7.Models
         [Required]
         public string Status { get; set; } = "Pending";
 
-        public string? OwnerNote { get; set; } = ""; 
+        public string? OwnerNote { get; set; } = "";
+
+        [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5.")]
+        public int? Rating { get; set; }
     }
 
     public class CurrentOrFutureDateAttribute : ValidationAttribute

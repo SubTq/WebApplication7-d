@@ -51,5 +51,21 @@ namespace WebApplication7.Data
                 .HasForeignKey(r => r.UserId);
         }
 
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            // Automatyczna aktualizacja statusu rezerwacji na "Zakończony"
+            var reservationsToUpdate = ChangeTracker.Entries<Reservation>()
+                .Where(e => e.Entity.EndDate < DateTime.Now && e.Entity.Status != "Ended")
+                .Select(e => e.Entity);
+
+            foreach (var reservation in reservationsToUpdate)
+            {
+                reservation.Status = "Ended";
+            }
+
+            return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+
     }
 }

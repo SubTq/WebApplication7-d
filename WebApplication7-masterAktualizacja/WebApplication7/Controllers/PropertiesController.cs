@@ -80,8 +80,10 @@ namespace WebApplication7.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Pobierz dane mieszkania wraz z właścicielem i rezerwacjami
             var property = await _context.Properties
                 .Include(p => p.OwnerUser)
+                .Include(p => p.Reservations) // Pobranie rezerwacji
                 .FirstOrDefaultAsync(m => m.PropertyId == id);
 
             if (property == null)
@@ -90,17 +92,33 @@ namespace WebApplication7.Controllers
                 return RedirectToAction("Index");
             }
 
-            var currentUserEmail = User.Identity?.Name;
-            ViewData["IsOwner"] = property.OwnerUser?.Email == currentUserEmail;
-            ViewData["CurrentUserEmail"] = currentUserEmail;
-            ViewData["OwnerEmail"] = property.OwnerUser?.Email ?? "Unknown";
+            // Obliczanie średniej oceny i liczby ocen
+            var ratings = property.Reservations
+                .Where(r => r.Rating.HasValue) // Pobierz tylko rezerwacje z oceną
+                .Select(r => r.Rating.Value)
+                .ToList();
 
+            double averageRating = ratings.Any() ? ratings.Average() : 0.0; // Oblicz średnią ocen
+            int ratingsCount = ratings.Count; // Liczba ocen
+
+            // Przekazanie danych do ViewData
+            ViewData["AverageRating"] = averageRating;
+            ViewData["RatingsCount"] = ratingsCount;
+
+            // Obsługa obrazków
             ViewData["MainImageUrl"] = !string.IsNullOrEmpty(property.ImageUrl) ? property.ImageUrl : "https://via.placeholder.com/150";
             ViewData["AdditionalImageUrl1"] = !string.IsNullOrEmpty(property.AdditionalImageUrl1) ? property.AdditionalImageUrl1 : null;
             ViewData["AdditionalImageUrl2"] = !string.IsNullOrEmpty(property.AdditionalImageUrl2) ? property.AdditionalImageUrl2 : null;
 
+            // Sprawdzenie, czy użytkownik jest właścicielem
+            var currentUserEmail = User.Identity?.Name;
+            ViewData["IsOwner"] = property.OwnerUser?.Email == currentUserEmail;
+
             return View(property);
         }
+
+
+
 
 
         // GET: Properties/MyProperties
@@ -139,15 +157,22 @@ namespace WebApplication7.Controllers
                 return NotFound("User not found.");
             }
 
-            ViewData["OwnerUserId"] = user.UserId;
-            return View();
+            // Przypisz numer kontaktowy z profilu użytkownika do modelu
+            var property = new Property
+            {
+                OwnerUserId = user.UserId,
+                ContactNumber = user.ContactNumber // Pobierz numer kontaktowy
+            };
+
+            return View(property);
         }
+
 
         // POST: Properties/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("PropertyId,Address,Type,Price,Status,ContactNumber,Description,ImageUrl,AdditionalImageUrl1,AdditionalImageUrl2")] Property property)
+        public async Task<IActionResult> Create([Bind("PropertyId,Address,Type,Price,Status,Description,ImageUrl,AdditionalImageUrl1,AdditionalImageUrl2")] Property property)
         {
             if (ModelState.IsValid)
             {
@@ -159,38 +184,16 @@ namespace WebApplication7.Controllers
                     if (user == null)
                     {
                         ModelState.AddModelError("", $"Owner user with email {currentUserEmail} not found.");
-                        _logger.LogWarning($"Owner user with email {currentUserEmail} not found.");
+                        return View(property);
                     }
-                    else
-                    {
-                        property.OwnerUserId = user.UserId;
-                        property.OwnerUser = user;
 
-                        if (!Uri.IsWellFormedUriString(property.ImageUrl, UriKind.Absolute))
-                        {
-                            ModelState.AddModelError("ImageUrl", "The ImageUrl field must be a valid URL.");
-                            return View(property);
-                        }
+                    property.OwnerUserId = user.UserId;
+                    property.OwnerUser = user;
+                    property.ContactNumber = user.ContactNumber; // Pobierz numer kontaktowy z profilu
 
-                        if (!string.IsNullOrEmpty(property.AdditionalImageUrl1) &&
-                            !Uri.IsWellFormedUriString(property.AdditionalImageUrl1, UriKind.Absolute))
-                        {
-                            ModelState.AddModelError("AdditionalImageUrl1", "Additional Image 1 URL must be a valid URL.");
-                            return View(property);
-                        }
-
-                        if (!string.IsNullOrEmpty(property.AdditionalImageUrl2) &&
-                            !Uri.IsWellFormedUriString(property.AdditionalImageUrl2, UriKind.Absolute))
-                        {
-                            ModelState.AddModelError("AdditionalImageUrl2", "Additional Image 2 URL must be a valid URL.");
-                            return View(property);
-                        }
-
-                        _context.Add(property);
-                        await _context.SaveChangesAsync();
-                        _logger.LogInformation("Property added successfully");
-                        return RedirectToAction(nameof(MyProperties));
-                    }
+                    _context.Add(property);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(MyProperties));
                 }
                 catch (Exception ex)
                 {
@@ -201,11 +204,11 @@ namespace WebApplication7.Controllers
             return View(property);
         }
 
+
         private void PopulateStatusList(string selectedStatus = null)
         {
             ViewBag.StatusList = new SelectList(new[] { "Available", "Rented", "Under Maintenance" }, selectedStatus);
         }
-
         // GET: Properties/Edit/5
         [Authorize]
         public async Task<IActionResult> Edit(int? id)
@@ -234,14 +237,22 @@ namespace WebApplication7.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            // Pobierz aktualny numer telefonu użytkownika
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
+            if (user != null)
+            {
+                property.ContactNumber = user.ContactNumber; // Aktualizacja numeru telefonu
+            }
+
             return View(property);
         }
+
 
         // POST: Properties/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(int id, [Bind("PropertyId,Address,Type,Price,Status,ContactNumber,Description,ImageUrl,AdditionalImageUrl1,AdditionalImageUrl2,OwnerUserId")] Property property)
+        public async Task<IActionResult> Edit(int id, [Bind("PropertyId,Address,Type,Price,Status,Description,ImageUrl,AdditionalImageUrl1,AdditionalImageUrl2,OwnerUserId")] Property property)
         {
             if (id != property.PropertyId)
             {
@@ -249,7 +260,6 @@ namespace WebApplication7.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            var currentUserEmail = User.Identity?.Name;
             var existingProperty = await _context.Properties
                 .Include(p => p.OwnerUser)
                 .FirstOrDefaultAsync(p => p.PropertyId == id);
@@ -260,51 +270,53 @@ namespace WebApplication7.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            if (existingProperty.OwnerUser?.Email != currentUserEmail)
+            var currentUserEmail = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
+
+            if (existingProperty.OwnerUser?.Email != currentUserEmail || user == null)
             {
                 TempData["ErrorMessage"] = "You are not authorized to edit this property.";
                 return RedirectToAction("Index", "Home");
             }
 
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = "Please correct the errors and try again.";
-                return View(property);
-            }
-
-            try
-            {
-                existingProperty.Address = property.Address;
-                existingProperty.Type = property.Type;
-                existingProperty.Price = property.Price;
-                existingProperty.Status = property.Status;
-                existingProperty.ContactNumber = property.ContactNumber;
-                existingProperty.Description = property.Description;
-                existingProperty.ImageUrl = property.ImageUrl;
-                existingProperty.AdditionalImageUrl1 = property.AdditionalImageUrl1;
-                existingProperty.AdditionalImageUrl2 = property.AdditionalImageUrl2;
-
-                _context.Update(existingProperty);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Property updated successfully.";
-                return RedirectToAction(nameof(MyProperties));
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PropertyExists(property.PropertyId))
+                try
                 {
-                    TempData["ErrorMessage"] = "Property not found.";
-                    return RedirectToAction("Index", "Home");
+                    existingProperty.Address = property.Address;
+                    existingProperty.Type = property.Type;
+                    existingProperty.Price = property.Price;
+                    existingProperty.Status = property.Status;
+                    existingProperty.Description = property.Description;
+                    existingProperty.ImageUrl = property.ImageUrl;
+                    existingProperty.AdditionalImageUrl1 = property.AdditionalImageUrl1;
+                    existingProperty.AdditionalImageUrl2 = property.AdditionalImageUrl2;
+
+                    // ContactNumber pozostaje niezmienialny
+                    existingProperty.ContactNumber = user.ContactNumber;
+
+                    _context.Update(existingProperty);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Property updated successfully.";
+                    return RedirectToAction(nameof(MyProperties));
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (!PropertyExists(property.PropertyId))
+                    {
+                        TempData["ErrorMessage"] = "Property not found.";
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
             }
-
-
+            return View(property);
         }
+
 
         [Authorize]
         public async Task<IActionResult> ManageReservations(int propertyId)

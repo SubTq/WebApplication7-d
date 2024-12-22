@@ -30,6 +30,14 @@ builder.Services.AddControllersWithViews();
 // Pobierz port z zmiennej œrodowiskowej
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 
+var cultureInfo = new System.Globalization.CultureInfo("en-US");
+cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
+cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+cultureInfo.NumberFormat.CurrencySymbol = "PLN"; // Ustawienie symbolu waluty
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
+
 // Uruchom aplikacjê z ustawieniem dynamicznego portu
 var app = builder.Build();
 

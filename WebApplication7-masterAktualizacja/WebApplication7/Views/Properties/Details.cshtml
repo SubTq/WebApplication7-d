@@ -3,22 +3,22 @@
 @{
     ViewData["Title"] = "Property Details";
     bool isOwner = ViewData["IsOwner"] != null && (bool)ViewData["IsOwner"];
+    double averageRating = ViewData["AverageRating"] != null ? (double)ViewData["AverageRating"] : 0.0;
+    int ratingsCount = ViewData["RatingsCount"] != null ? (int)ViewData["RatingsCount"] : 0;
 }
 
 <h2>Property Details</h2>
 
-
 <div>
     <hr />
     <div class="property-images">
-        <!-- Główne zdjęcie -->
-        @if (!string.IsNullOrEmpty((string)ViewData["MainImageUrl"]))
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
         {
-            <img src="@ViewData["MainImageUrl"]" alt="Main Property Image" class="thumbnail" onclick="openModal();currentSlide(1)">
+            <img src="@Model.ImageUrl" alt="Main Property Image" class="thumbnail" onclick="openModal();currentSlide(1)" />
         }
         else
         {
-            <img src="https://example.com/default-image.jpg" alt="Default Property Image" class="thumbnail">
+            <img src="https://example.com/default-image.jpg" alt="Default Property Image" class="thumbnail" />
         }
     </div>
     <dl class="row">
@@ -30,19 +30,36 @@
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Price)</dd>
         <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Status)</dt>
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Status)</dd>
+
         @if (Model.OwnerUser != null)
         {
             <dt class="col-sm-2">Owner Email</dt>
             <dd class="col-sm-10">@Html.DisplayFor(model => model.OwnerUser.Email)</dd>
+            <dt class="col-sm-2">Owner Contact</dt>
+            <dd class="col-sm-10">@Model.OwnerUser.ContactNumber</dd>
         }
         else
         {
             <dt class="col-sm-2">Owner Email</dt>
             <dd class="col-sm-10">Unknown Owner</dd>
         }
+
+        <!-- Wyświetlanie ocen -->
+        <dt class="col-sm-2">Average Rating</dt>
+        <dd class="col-sm-10">
+            @if (ratingsCount > 0)
+            {
+                <span>@($"Average Rating: {averageRating:F1}, Count: {ratingsCount}")</span>
+            }
+            else
+            {
+                <span>No ratings yet.</span>
+            }
+        </dd>
+
+
     </dl>
 
-    <!-- Dynamiczne akcje -->
     @if (!isOwner)
     {
         @if (User.Identity.IsAuthenticated)
@@ -59,9 +76,9 @@
         <a asp-action="Edit" asp-route-id="@Model.PropertyId" class="btn btn-info">Edit Property Details</a>
     }
 
-    <!-- Powrót -->
     <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Home</a>
 </div>
+
 
 <!-- The Modal/Lightbox -->
 <div id="propertyModal" class="modal">
@@ -70,34 +87,21 @@
         @if (!string.IsNullOrEmpty((string)ViewData["MainImageUrl"]))
         {
             <div class="mySlides">
-                <div class="numbertext">1 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) ? 1 : 0) + (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 1 : 0) + 1)</div>
-                <img src="@ViewData["MainImageUrl"]" style="width:100%">
+                <img src="@ViewData["MainImageUrl"]" alt="Main Image">
             </div>
         }
-        else
-        {
-            <div class="mySlides">
-                <div class="numbertext">1 / 1</div>
-                <img src="https://example.com/default-image.jpg" style="width:100%">
-            </div>
-        }
-
         @if (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]))
         {
             <div class="mySlides">
-                <div class="numbertext">2 / @((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]) ? 3 : 2))</div>
-                <img src="@ViewData["AdditionalImageUrl1"]" style="width:100%">
+                <img src="@ViewData["AdditionalImageUrl1"]" alt="Additional Image 1">
             </div>
         }
-
         @if (!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"]))
         {
             <div class="mySlides">
-                <div class="numbertext">3 / 3</div>
-                <img src="@ViewData["AdditionalImageUrl2"]" style="width:100%">
+                <img src="@ViewData["AdditionalImageUrl2"]" alt="Additional Image 2">
             </div>
         }
-
         <!-- Kontrola następny/poprzedni -->
         @if ((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) || !string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"])))
         {
@@ -106,6 +110,7 @@
         }
     </div>
 </div>
+
 
 @section Scripts {
     <script>
@@ -160,7 +165,13 @@
             padding: 0;
             width: 80%;
             max-width: 700px;
+            height: 500px; /* Dodano stałą wysokość */
             position: relative;
+            overflow: hidden; /* Ukrywa wszystko poza widocznym obszarem */
+            display: flex; /* Aby wycentrować obraz */
+            align-items: center;
+            justify-content: center;
+            background-color: #000; /* Ustawiono tło */
         }
 
         .close {
@@ -180,8 +191,9 @@
             .mySlides img {
                 margin: auto;
                 max-width: 100%;
-                max-height: 80vh;
+                max-height: 100%;
                 display: block;
+                object-fit: contain; /* Obrazy dopasowują się do kontenera */
             }
 
         .prev, .next {

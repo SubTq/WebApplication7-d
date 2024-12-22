@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication7.Models
 {
@@ -45,5 +46,15 @@ namespace WebApplication7.Models
         public string? AdditionalImageUrl2 { get; set; } = null;
 
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+
+        // Właściwości do ocen
+        [NotMapped]
+        public double AverageRating => Reservations.Any(r => r.Rating.HasValue)
+    ? Reservations.Where(r => r.Rating.HasValue).Average(r => r.Rating.Value)
+    : 0.0;
+
+
+        [NotMapped]
+        public int RatingsCount => Reservations?.Count(r => r.Rating.HasValue) ?? 0;
     }
 }
