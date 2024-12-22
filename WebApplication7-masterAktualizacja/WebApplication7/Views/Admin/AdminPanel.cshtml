@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Admin Panel";
+}
+
+<h1>Admin Panel</h1>
+
+<div class="card-deck mt-4">
+    <!-- Users Card -->
+    <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+        <div class="card-header">Users Management</div>
+        <div class="card-body">
+            <h5 class="card-title">Manage Users</h5>
+            <p class="card-text">View, edit, and delete users in the system.</p>
+            <a asp-action="Users" asp-controller="Admin" class="btn btn-light">Go to Users</a>
+        </div>
+    </div>
+
+    <!-- Properties Card -->
+    <div class="card text-white bg-success mb-3" style="max-width: 18rem;">
+        <div class="card-header">Properties Management</div>
+        <div class="card-body">
+            <h5 class="card-title">Manage Properties</h5>
+            <p class="card-text">View, edit, and delete properties listed in the system.</p>
+            <a asp-action="Properties" asp-controller="Admin" class="btn btn-light">Go to Properties</a>
+        </div>
+    </div>
+
+    <!-- Reservations Card -->
+    <div class="card text-white bg-warning mb-3" style="max-width: 18rem;">
+        <div class="card-header">Reservations Management</div>
+        <div class="card-body">
+            <h5 class="card-title">Manage Reservations</h5>
+            <p class="card-text">View, manage, and delete reservations.</p>
+            <a asp-action="Reservations" asp-controller="Admin" class="btn btn-light">Go to Reservations</a>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Back to Home</a>
+</div>

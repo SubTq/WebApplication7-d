@@ -27,9 +27,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Dodaj widoki i kontrolery do aplikacji
 builder.Services.AddControllersWithViews();
 
-// Pobierz port z zmiennej œrodowiskowej
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-
+// Ustawienia lokalizacji i waluty
 var cultureInfo = new System.Globalization.CultureInfo("en-US");
 cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
 cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
@@ -37,11 +35,14 @@ cultureInfo.NumberFormat.CurrencySymbol = "PLN"; // Ustawienie symbolu waluty
 System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+});
 
-// Uruchom aplikacjê z ustawieniem dynamicznego portu
 var app = builder.Build();
 
-// Obs³uga wyj¹tków (ró¿ni siê w zale¿noœci od trybu)
+// Obs³uga wyj¹tków
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -52,23 +53,16 @@ else
     app.UseHsts();
 }
 
-// Obs³uga przekierowania do HTTPS
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-// Obs³uga uwierzytelniania i autoryzacji
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Routing kontrolerów
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Dodaj dynamiczne ustawienie URL na podstawie portu
-app.Urls.Add($"http://0.0.0.0:{port}");
-
-// Uruchom aplikacjê
 app.Run();

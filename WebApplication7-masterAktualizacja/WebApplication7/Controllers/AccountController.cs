@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Net.Mail;
 using System;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace WebApplication7.Controllers
 {
@@ -105,15 +106,28 @@ namespace WebApplication7.Controllers
                 return View();
             }
 
+            // Tworzenie listy roszczeń (claims)
             var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, user.Email),
+        new Claim(ClaimTypes.Email, user.Email),
+         new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()) 
+    };
+
+            // Jeśli użytkownik jest administratorem, dodaj rolę "Admin"
+            if (user.IsAdmin)
             {
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Email, user.Email)
-            };
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
+
+            // Utwórz tożsamość i zaloguj użytkownika
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+            // Przekierowanie na stronę główną po zalogowaniu
             return RedirectToAction("Index", "Home");
         }
+
 
         // GET: Account/Logout
         public async Task<IActionResult> Logout()
@@ -371,6 +385,29 @@ namespace WebApplication7.Controllers
             }
         }
 
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            base.OnActionExecuting(filterContext);
+
+            if (User.Identity.IsAuthenticated)
+            {
+                var currentUserEmail = User.Identity.Name;
+                var user = _context.Users.FirstOrDefault(u => u.Email == currentUserEmail);
+
+                if (user != null && user.IsAdmin)
+                {
+                    ViewData["IsAdmin"] = true;
+                }
+                else
+                {
+                    ViewData["IsAdmin"] = false;
+                }
+            }
+            else
+            {
+                ViewData["IsAdmin"] = false;
+            }
+        }
 
 
 

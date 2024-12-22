@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebApplication7.Models
 {
-    public class User
+    public class User 
     {
         public int UserId { get; set; }
 
@@ -28,9 +29,11 @@ namespace WebApplication7.Models
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpiry { get; set; }
 
-        
         [Phone]
         public string? ContactNumber { get; set; }
+
+        // Dodaj pole IsAdmin
+        public bool IsAdmin { get; set; } = false;
 
         public ICollection<Property> Properties { get; set; } = new List<Property>();
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();

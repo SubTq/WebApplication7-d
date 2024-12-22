@@ -1,0 +1,31 @@
+﻿@model IEnumerable<WebApplication7.Models.Reservation>
+
+<h2>Reservations</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Property</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reservation in Model)
+        {
+            <tr>
+                <td>@reservation.User?.Email</td>
+                <td>@reservation.Property?.Address</td>
+                <td>@reservation.StartDate.ToString("yyyy-MM-dd")</td>
+                <td>@reservation.EndDate.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <a asp-action="DeleteReservation" asp-route-id="@reservation.ReservationId" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="AdminPanel" asp-controller="Admin" class="btn btn-secondary mt-3">Back</a>

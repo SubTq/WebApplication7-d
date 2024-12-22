@@ -1,0 +1,31 @@
+﻿@model IEnumerable<WebApplication7.Models.Property>
+
+<h2>Properties</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Address</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var property in Model)
+        {
+            <tr>
+                <td>@property.Address</td>
+                <td>@property.Type</td>
+                <td>@property.Price PLN</td>
+                <td>@property.Status</td>
+                <td>
+                    <a asp-action="DeleteProperty" asp-route-id="@property.PropertyId" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="AdminPanel" asp-controller="Admin" class="btn btn-secondary mt-3">Back</a>

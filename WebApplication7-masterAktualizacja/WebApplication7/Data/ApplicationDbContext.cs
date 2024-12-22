@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebApplication7.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace WebApplication7.Data
 {
@@ -26,9 +27,10 @@ namespace WebApplication7.Data
                 .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Property>()
-                .HasOne(p => p.OwnerUser)
-                .WithMany(u => u.Properties)
-                .HasForeignKey(p => p.OwnerUserId);
+     .HasOne(p => p.OwnerUser)
+     .WithMany(u => u.Properties)
+     .HasForeignKey(p => p.OwnerUserId);
+
 
             modelBuilder.Entity<Property>()
                 .HasMany(p => p.Reservations)

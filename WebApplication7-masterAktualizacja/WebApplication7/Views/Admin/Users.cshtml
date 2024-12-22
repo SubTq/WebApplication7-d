@@ -1,0 +1,34 @@
+﻿@model IEnumerable<WebApplication7.Models.User>
+
+<h2>Users</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Contact Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>@user.ContactNumber</td>
+                <td>
+                    @if (user.UserId != ViewBag.CurrentUserId)
+                    {
+                        <a asp-action="DeleteUser" asp-route-id="@user.UserId" class="btn btn-danger">Delete</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Cannot delete current user</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="AdminPanel" asp-controller="Admin" class="btn btn-secondary mt-3">Back</a>
