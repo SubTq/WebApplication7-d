@@ -22,7 +22,12 @@
             <!-- Type -->
             <div class="form-group">
                 <label asp-for="Type" class="control-label"></label>
-                <input asp-for="Type" class="form-control" />
+                <select asp-for="Type" class="form-control">
+                    <option value="Mieszkanie">Mieszkanie</option>
+                    <option value="Apartament">Apartament</option>
+                    <option value="Penthouse">Penthouse</option>
+                    <option value="Loft">Loft</option>
+                </select>
                 <span asp-validation-for="Type" class="text-danger"></span>
             </div>
 
@@ -36,9 +41,10 @@
             <!-- Status -->
             <div class="form-group">
                 <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
+                <input asp-for="Status" class="form-control" readonly value="Available" />
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
+
 
             <!-- Contact Number -->
             <div class="form-group">
@@ -46,7 +52,6 @@
                 <input asp-for="ContactNumber" class="form-control" readonly />
                 <span asp-validation-for="ContactNumber" class="text-danger"></span>
             </div>
-
 
             <!-- Description -->
             <div class="form-group">
@@ -90,7 +95,6 @@
 <div>
     <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Home</a>
 </div>
-
 
 @section Scripts {
     @{

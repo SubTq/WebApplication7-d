@@ -49,12 +49,16 @@ namespace WebApplication7.Models
 
         // Właściwości do ocen
         [NotMapped]
-        public double AverageRating => Reservations.Any(r => r.Rating.HasValue)
-    ? Reservations.Where(r => r.Rating.HasValue).Average(r => r.Rating.Value)
-    : 0.0;
-
+        public double AverageRating =>
+            Reservations != null && Reservations.Any(r => r.Rating.HasValue)
+                ? Reservations.Where(r => r.Rating.HasValue).Average(r => (double)r.Rating.Value) // Rzutowanie Rating na double
+                : 0.0;
 
         [NotMapped]
-        public int RatingsCount => Reservations?.Count(r => r.Rating.HasValue) ?? 0;
+        public int RatingsCount =>
+            Reservations != null
+                ? Reservations.Count(r => r.Rating.HasValue)
+                : 0; // Zwrócenie 0, jeśli Reservations jest null
+
     }
 }

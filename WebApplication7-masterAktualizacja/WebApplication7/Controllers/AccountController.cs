@@ -53,6 +53,7 @@ namespace WebApplication7.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     Email = model.Email,
+                    ContactNumber = model.ContactNumber, // Contact number added
                     NormalizedEmail = model.Email.Trim().ToUpperInvariant()
                 };
                 user.SetPassword(model.Password);
@@ -61,10 +62,10 @@ namespace WebApplication7.Controllers
                 await _context.SaveChangesAsync();
 
                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Email),
-                    new Claim(ClaimTypes.Email, user.Email)
-                };
+        {
+            new(ClaimTypes.Name, user.Email),
+            new(ClaimTypes.Email, user.Email)
+        };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
@@ -73,6 +74,7 @@ namespace WebApplication7.Controllers
 
             return View(model);
         }
+
 
         // GET: Account/Login
         public IActionResult Login()
@@ -108,11 +110,11 @@ namespace WebApplication7.Controllers
 
             // Tworzenie listy roszczeń (claims)
             var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, user.Email),
-        new Claim(ClaimTypes.Email, user.Email),
-         new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()) 
-    };
+{
+    new(ClaimTypes.Name, user.Email),
+    new(ClaimTypes.Email, user.Email),
+    new(ClaimTypes.NameIdentifier, user.UserId.ToString())
+};
 
             // Jeśli użytkownik jest administratorem, dodaj rolę "Admin"
             if (user.IsAdmin)
@@ -228,21 +230,25 @@ namespace WebApplication7.Controllers
 
         private static string GenerateResetToken()
         {
-            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
-            {
-                var bytes = new byte[32];
-                rng.GetBytes(bytes);
-                return Convert.ToBase64String(bytes);
-            }
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            var bytes = new byte[32];
+            rng.GetBytes(bytes);
+            return Convert.ToBase64String(bytes);
         }
 
         private void SendResetEmail(string toEmail, string token)
         {
-            string resetLink = Url.Action("ResetPassword", "Account", new { token }, Request.Scheme);
+            string resetLink = Url.Action("ResetPassword", "Account", new { token }, Request.Scheme)
+                ?? throw new InvalidOperationException("Unable to generate reset link.");
 
-            var mailMessage = new MailMessage
+            if (string.IsNullOrWhiteSpace(toEmail))
             {
-                From = new MailAddress("houserentproject@gmail.com", "RentHouse Support"),
+                throw new ArgumentException("Recipient email cannot be null or empty.", nameof(toEmail));
+            }
+
+            var mailMessage = new MailMessage()
+            {
+                From = new("houserentproject@gmail.com", "RentHouse Support"),
                 Subject = "Reset Password",
                 Body = $"Click the link to reset your password: <a href='{resetLink}'>Reset Password</a>",
                 IsBodyHtml = true
@@ -251,18 +257,19 @@ namespace WebApplication7.Controllers
 
             try
             {
-                using (var smtpClient = new SmtpClient("smtp.gmail.com"))
+                using var smtpClient = new SmtpClient("smtp.gmail.com")
                 {
-                    smtpClient.Port = 587;
-                    smtpClient.Credentials = new System.Net.NetworkCredential("houserentproject@gmail.com", "nzse ndli tcnm lljo");
-                    smtpClient.EnableSsl = true;
-                    smtpClient.Send(mailMessage);
-                }
-                _logger.LogInformation($"Password reset email successfully sent to {toEmail}");
+                    Port = 587,
+                    Credentials = new System.Net.NetworkCredential("houserentproject@gmail.com", "nzse ndli tcnm lljo"),
+                    EnableSsl = true
+                };
+                smtpClient.Send(mailMessage);
+                _logger.LogInformation("Password reset email successfully sent to {Email}", toEmail);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to send reset email to {toEmail}: {ex.Message}");
+                _logger.LogError("Failed to send reset email to {Email}: {ErrorMessage}", toEmail, ex.Message);
+                throw;
             }
         }
 
@@ -338,6 +345,12 @@ namespace WebApplication7.Controllers
             try
             {
                 var currentUserEmail = User.Identity?.Name;
+                if (string.IsNullOrEmpty(currentUserEmail))
+                {
+                    TempData["ErrorMessage"] = "Unable to determine the current user email.";
+                    return RedirectToAction("Index", "Home");
+                }
+
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
 
                 if (existingUser == null || existingUser.UserId != model.UserId)
@@ -389,19 +402,12 @@ namespace WebApplication7.Controllers
         {
             base.OnActionExecuting(filterContext);
 
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity != null && User.Identity.IsAuthenticated && !string.IsNullOrWhiteSpace(User.Identity.Name))
             {
                 var currentUserEmail = User.Identity.Name;
                 var user = _context.Users.FirstOrDefault(u => u.Email == currentUserEmail);
 
-                if (user != null && user.IsAdmin)
-                {
-                    ViewData["IsAdmin"] = true;
-                }
-                else
-                {
-                    ViewData["IsAdmin"] = false;
-                }
+                ViewData["IsAdmin"] = user?.IsAdmin ?? false;
             }
             else
             {
@@ -411,9 +417,11 @@ namespace WebApplication7.Controllers
 
 
 
+
     }
 
 }
+
 
 
 

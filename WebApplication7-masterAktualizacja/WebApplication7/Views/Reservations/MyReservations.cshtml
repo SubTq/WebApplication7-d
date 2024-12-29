@@ -49,8 +49,8 @@
                         @if (item.Status != "Ended")
                         {
                             <a asp-action="Edit" asp-route-id="@item.ReservationId">Edit</a>
- 
-                    < a asp - action = "Delete" asp - route - id = "@item.ReservationId" > Delete </ a >
+                            <a asp-action="Delete" asp-route-id="@item.ReservationId" >Delete</a>
+
                        }
                         else
                         {

@@ -57,5 +57,11 @@ namespace WebApplication7.Controllers
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(user);
         }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
     }
 }

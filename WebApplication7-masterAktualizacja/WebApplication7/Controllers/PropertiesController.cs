@@ -93,13 +93,15 @@ namespace WebApplication7.Controllers
             }
 
             // Obliczanie średniej oceny i liczby ocen
-            var ratings = property.Reservations
-                .Where(r => r.Rating.HasValue) // Pobierz tylko rezerwacje z oceną
-                .Select(r => r.Rating.Value)
-                .ToList();
+            var ratings = property.Reservations != null
+                ? property.Reservations
+                    .Where(r => r.Rating.HasValue) // Pobierz tylko rezerwacje z oceną
+                    .Select(r => (double)r.Rating.Value) // Rzutowanie na double
+                    .ToList()
+                : new List<double>(); // Domyślna pusta lista, jeśli Reservations jest null
 
             double averageRating = ratings.Any() ? ratings.Average() : 0.0; // Oblicz średnią ocen
-            int ratingsCount = ratings.Count; // Liczba ocen
+            int ratingsCount = ratings.Count(); // Wywołanie Count jako metody
 
             // Przekazanie danych do ViewData
             ViewData["AverageRating"] = averageRating;
@@ -119,12 +121,10 @@ namespace WebApplication7.Controllers
 
 
 
-
-
         // GET: Properties/MyProperties
         public async Task<IActionResult> MyProperties()
         {
-            var currentUserEmail = User.Identity.Name;
+            var currentUserEmail = User.Identity?.Name;
 
             if (string.IsNullOrEmpty(currentUserEmail))
             {
@@ -133,7 +133,7 @@ namespace WebApplication7.Controllers
             }
 
             var properties = await _context.Properties
-                .Where(p => p.OwnerUser.Email == currentUserEmail)
+                .Where(p => p.OwnerUser != null && p.OwnerUser.Email == currentUserEmail)
                 .Include(p => p.Reservations) // Ważne: Dodanie Include
                 .ThenInclude(r => r.User)    // Opcjonalnie: Dodanie użytkownika
                 .ToListAsync();
@@ -148,7 +148,13 @@ namespace WebApplication7.Controllers
         [Authorize]
         public async Task<IActionResult> Create()
         {
-            var currentUserEmail = User.Identity.Name;
+            var currentUserEmail = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(currentUserEmail))
+            {
+                _logger.LogWarning("User.Identity.Name is null or empty.");
+                return NotFound("User not found.");
+            }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
             if (user == null)
@@ -157,7 +163,6 @@ namespace WebApplication7.Controllers
                 return NotFound("User not found.");
             }
 
-            // Przypisz numer kontaktowy z profilu użytkownika do modelu
             var property = new Property
             {
                 OwnerUserId = user.UserId,
@@ -168,23 +173,34 @@ namespace WebApplication7.Controllers
         }
 
 
-        // POST: Properties/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("PropertyId,Address,Type,Price,Status,Description,ImageUrl,AdditionalImageUrl1,AdditionalImageUrl2")] Property property)
+        public async Task<IActionResult> Create([Bind("PropertyId,Address,Type,Price,Description,ImageUrl,AdditionalImageUrl1,AdditionalImageUrl2,Status")] Property property)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var currentUserEmail = User.Identity.Name;
+                    var currentUserEmail = User.Identity?.Name;
+
+                    if (string.IsNullOrEmpty(currentUserEmail))
+                    {
+                        ModelState.AddModelError("", "Current user email is null or empty.");
+                        return View(property);
+                    }
 
                     var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
                     if (user == null)
                     {
                         ModelState.AddModelError("", $"Owner user with email {currentUserEmail} not found.");
                         return View(property);
+                    }
+
+                    // Jeśli status nie jest ustawiony, ustaw domyślną wartość
+                    if (string.IsNullOrEmpty(property.Status))
+                    {
+                        property.Status = "Available";
                     }
 
                     property.OwnerUserId = user.UserId;
@@ -205,10 +221,12 @@ namespace WebApplication7.Controllers
         }
 
 
-        private void PopulateStatusList(string selectedStatus = null)
+
+        private void PopulateStatusList(string? selectedStatus = null)
         {
             ViewBag.StatusList = new SelectList(new[] { "Available", "Rented", "Under Maintenance" }, selectedStatus);
         }
+
         // GET: Properties/Edit/5
         [Authorize]
         public async Task<IActionResult> Edit(int? id)
@@ -321,11 +339,17 @@ namespace WebApplication7.Controllers
         [Authorize]
         public async Task<IActionResult> ManageReservations(int propertyId)
         {
-            var currentUserEmail = User.Identity.Name;
+            var currentUserEmail = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(currentUserEmail))
+            {
+                return NotFound("User not found or unauthorized access.");
+            }
+
             var property = await _context.Properties
                 .Include(p => p.Reservations)
                 .ThenInclude(r => r.User)
-                .FirstOrDefaultAsync(p => p.PropertyId == propertyId && p.OwnerUser.Email == currentUserEmail);
+                .FirstOrDefaultAsync(p => p.PropertyId == propertyId && p.OwnerUser != null && p.OwnerUser.Email == currentUserEmail);
 
             if (property == null)
             {
@@ -334,6 +358,7 @@ namespace WebApplication7.Controllers
 
             return View(property);
         }
+
 
 
 

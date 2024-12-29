@@ -39,10 +39,19 @@ namespace WebApplication7.Models
 
     public class CurrentOrFutureDateAttribute : ValidationAttribute
     {
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
-            DateTime date = Convert.ToDateTime(value);
-            return date >= DateTime.Now.Date;
+            if (value == null)
+            {
+                return false; // Możesz zwrócić false lub true w zależności od reguły walidacji
+            }
+
+            if (value is DateTime date)
+            {
+                return date >= DateTime.Now.Date;
+            }
+
+            return false; // Nieprawidłowy typ danych
         }
     }
 }
