@@ -1,4 +1,4 @@
-/* Stylizacja ogólna */
+
 body {
     padding-top: 20px;
 }
@@ -9,37 +9,37 @@ body {
     border-top: .05rem solid #e5e5e5;
 }
 
-/* Ustawienia dla kontenera hamburgera */
+
 .hamburger-menu-container {
-    position: relative; /* Kontekst dla pozycjonowania menu */
-    display: inline-block; /* Zapewnia odpowiednie wyrównanie */
+    position: relative; 
+    display: inline-block; 
 }
 
-/* Stylizacja ikony hamburgera */
+
 .hamburger-menu {
     font-size: 30px;
     cursor: pointer;
     user-select: none;
 }
 
-/* Stylizacja rozwijanego menu */
+
 .menu-items {
-    position: absolute; /* Pozycjonowanie wzglêdem kontenera */
-    top: calc(100% + 5px); /* Umieszczone 5px poni¿ej hamburgera */
-    left: 0; /* Wyrównane do lewej krawêdzi kontenera */
-    background-color: #f8f9fa; /* Kolor t³a menu */
-    border: 1px solid #ccc; /* Ramka menu */
-    border-radius: 8px; /* Zaokr¹glenie rogów */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Cieñ dla menu */
+    position: absolute; 
+    top: calc(100% + 5px); 
+    left: 0; 
+    background-color: #f8f9fa; 
+    border: 1px solid #ccc; 
+    border-radius: 8px; 
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
     padding: 10px;
-    z-index: 1000; /* Wy¿szy priorytet wyœwietlania */
-    display: none; /* Domyœlnie ukryte */
-    min-width: 150px; /* Minimalna szerokoœæ menu */
-    max-width: 250px; /* Maksymalna szerokoœæ menu */
-    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
+    z-index: 1000; 
+    display: none; 
+    min-width: 150px; 
+    max-width: 250px; 
+    white-space: nowrap; 
 }
 
-    /* Stylizacja linków w menu */
+   
     .menu-items a {
         display: block;
         text-decoration: none;
@@ -54,10 +54,10 @@ body {
             transform: scale(1.05);
         }
 
-/* Dostosowanie dla urz¹dzeñ mobilnych */
+
 @media (max-width: 768px) {
     .menu-items {
-        width: 100%; /* Pe³na szerokoœæ na urz¹dzeniach mobilnych */
+        width: 100%; 
         left: 0;
         right: 0;
     }

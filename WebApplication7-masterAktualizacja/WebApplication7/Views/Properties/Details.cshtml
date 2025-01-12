@@ -44,7 +44,7 @@
             <dd class="col-sm-10">Unknown Owner</dd>
         }
 
-        <!-- Wyświetlanie ocen -->
+        
         <dt class="col-sm-2">Average Rating</dt>
         <dd class="col-sm-10">
             @if (ratingsCount > 0)
@@ -80,7 +80,7 @@
 </div>
 
 
-<!-- The Modal/Lightbox -->
+
 <div id="propertyModal" class="modal">
     <span class="close cursor" onclick="closeModal()">&times;</span>
     <div class="modal-content">
@@ -102,7 +102,7 @@
                 <img src="@ViewData["AdditionalImageUrl2"]" alt="Additional Image 2">
             </div>
         }
-        <!-- Kontrola następny/poprzedni -->
+        
         @if ((!string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl1"]) || !string.IsNullOrEmpty((string)ViewData["AdditionalImageUrl2"])))
         {
             <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
@@ -165,13 +165,13 @@
             padding: 0;
             width: 80%;
             max-width: 700px;
-            height: 500px; /* Dodano stałą wysokość */
+            height: 500px;
             position: relative;
-            overflow: hidden; /* Ukrywa wszystko poza widocznym obszarem */
-            display: flex; /* Aby wycentrować obraz */
+            overflow: hidden; 
+            display: flex; 
             align-items: center;
             justify-content: center;
-            background-color: #000; /* Ustawiono tło */
+            background-color: #000; 
         }
 
         .close {
@@ -193,7 +193,7 @@
                 max-width: 100%;
                 max-height: 100%;
                 display: block;
-                object-fit: contain; /* Obrazy dopasowują się do kontenera */
+                object-fit: contain; 
             }
 
         .prev, .next {

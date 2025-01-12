@@ -30,10 +30,10 @@ namespace WebApplication7.Models
         public User? OwnerUser { get; set; }
 
         [Phone(ErrorMessage = "Please enter a valid phone number.")]
-        public string? ContactNumber { get; set; } // Nullable
+        public string? ContactNumber { get; set; } 
 
         [MaxLength(1000, ErrorMessage = "Description cannot exceed 1000 characters.")]
-        public string? Description { get; set; } // Nullable
+        public string? Description { get; set; } 
 
         [Required(ErrorMessage = "Main image URL is required.")]
         [RegularExpression(@"^(https?:\/\/)[\w\-]+(\.[\w\-]+)+(:\d+)?(\/[\w\-\.]*)*(\?.*)?$", ErrorMessage = "Please enter a valid URL starting with http:// or https://.")]
@@ -47,18 +47,18 @@ namespace WebApplication7.Models
 
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
-        // Właściwości do ocen
+        
         [NotMapped]
         public double AverageRating =>
             Reservations != null && Reservations.Any(r => r.Rating.HasValue)
-                ? Reservations.Where(r => r.Rating.HasValue).Average(r => (double)r.Rating.Value) // Rzutowanie Rating na double
+                ? Reservations.Where(r => r.Rating.HasValue).Average(r => (double)r.Rating.Value) 
                 : 0.0;
 
         [NotMapped]
         public int RatingsCount =>
             Reservations != null
                 ? Reservations.Count(r => r.Rating.HasValue)
-                : 0; // Zwrócenie 0, jeśli Reservations jest null
+                : 0; 
 
     }
 }

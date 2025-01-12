@@ -27,13 +27,13 @@
                         {
                             @if (User.IsInRole("Admin"))
                             {
-                                <!-- Opcje dostępne tylko dla administratora -->
+                               
                                 <a asp-area="" asp-controller="Admin" asp-action="AdminPanel">Admin Panel</a>
                                 <a asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                             }
                             else
                             {
-                                <!-- Opcje dostępne dla zwykłych użytkowników -->
+                            
                                 <a asp-area="" asp-controller="Account" asp-action="Profile">My Profile</a>
                                 <a asp-area="" asp-controller="Properties" asp-action="MyProperties">My Properties</a>
                                 <a asp-area="" asp-controller="Properties" asp-action="Create">Add Property</a>
@@ -44,7 +44,7 @@
                         }
                         else
                         {
-                            <!-- Opcje dla użytkowników niezalogowanych -->
+                           
                             <a asp-area="" asp-controller="Account" asp-action="Login">Login</a>
                             <a asp-area="" asp-controller="Account" asp-action="Register">Register</a>
                         }
@@ -86,27 +86,27 @@
             const menuItems = $('#menuItems');
             const hamburgerMenu = $('#hamburgerMenu');
 
-            // Pokazanie menu po najechaniu na hamburgera
+          
             hamburgerMenu.hover(
                 function () {
-                    menuItems.stop(true, true).fadeIn(200); // Wyświetl menu
+                    menuItems.stop(true, true).fadeIn(200); 
                 },
                 function () {
                     setTimeout(function () {
                         if (!menuItems.is(':hover')) {
-                            menuItems.stop(true, true).fadeOut(200); // Ukryj menu
+                            menuItems.stop(true, true).fadeOut(200); 
                         }
                     }, 200);
                 }
             );
 
-            // Utrzymaj widoczność menu, gdy kursor jest nad nim
+           
             menuItems.hover(
                 function () {
                     menuItems.stop(true, true).show();
                 },
                 function () {
-                    menuItems.stop(true, true).fadeOut(200); // Ukryj menu
+                    menuItems.stop(true, true).fadeOut(200); 
                 }
             );
         });

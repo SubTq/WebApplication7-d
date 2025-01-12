@@ -22,7 +22,7 @@ namespace WebApplication7.Controllers
             _logger = logger;
         }
 
-        // GET: Properties
+      
         public async Task<IActionResult> Index(string searchString)
         {
             var properties = from p in _context.Properties select p;
@@ -70,7 +70,7 @@ namespace WebApplication7.Controllers
             return Json(new { properties = filteredProperties });
         }
 
-        // GET: Properties/Details/5
+     
         [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
@@ -80,10 +80,10 @@ namespace WebApplication7.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Pobierz dane mieszkania wraz z właścicielem i rezerwacjami
+            
             var property = await _context.Properties
                 .Include(p => p.OwnerUser)
-                .Include(p => p.Reservations) // Pobranie rezerwacji
+                .Include(p => p.Reservations) 
                 .FirstOrDefaultAsync(m => m.PropertyId == id);
 
             if (property == null)
@@ -92,27 +92,26 @@ namespace WebApplication7.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Obliczanie średniej oceny i liczby ocen
+          
             var ratings = property.Reservations != null
                 ? property.Reservations
-                    .Where(r => r.Rating.HasValue) // Pobierz tylko rezerwacje z oceną
-                    .Select(r => (double)r.Rating.Value) // Rzutowanie na double
+                    .Where(r => r.Rating.HasValue) 
+                    .Select(r => (double)r.Rating.Value) 
                     .ToList()
-                : new List<double>(); // Domyślna pusta lista, jeśli Reservations jest null
+                : new List<double>(); 
 
-            double averageRating = ratings.Any() ? ratings.Average() : 0.0; // Oblicz średnią ocen
-            int ratingsCount = ratings.Count(); // Wywołanie Count jako metody
-
-            // Przekazanie danych do ViewData
+            double averageRating = ratings.Any() ? ratings.Average() : 0.0; 
+            int ratingsCount = ratings.Count(); 
+            
             ViewData["AverageRating"] = averageRating;
             ViewData["RatingsCount"] = ratingsCount;
 
-            // Obsługa obrazków
+           
             ViewData["MainImageUrl"] = !string.IsNullOrEmpty(property.ImageUrl) ? property.ImageUrl : "https://via.placeholder.com/150";
             ViewData["AdditionalImageUrl1"] = !string.IsNullOrEmpty(property.AdditionalImageUrl1) ? property.AdditionalImageUrl1 : null;
             ViewData["AdditionalImageUrl2"] = !string.IsNullOrEmpty(property.AdditionalImageUrl2) ? property.AdditionalImageUrl2 : null;
 
-            // Sprawdzenie, czy użytkownik jest właścicielem
+           
             var currentUserEmail = User.Identity?.Name;
             ViewData["IsOwner"] = property.OwnerUser?.Email == currentUserEmail;
 
@@ -121,7 +120,7 @@ namespace WebApplication7.Controllers
 
 
 
-        // GET: Properties/MyProperties
+        
         public async Task<IActionResult> MyProperties()
         {
             var currentUserEmail = User.Identity?.Name;
@@ -134,8 +133,8 @@ namespace WebApplication7.Controllers
 
             var properties = await _context.Properties
                 .Where(p => p.OwnerUser != null && p.OwnerUser.Email == currentUserEmail)
-                .Include(p => p.Reservations) // Ważne: Dodanie Include
-                .ThenInclude(r => r.User)    // Opcjonalnie: Dodanie użytkownika
+                .Include(p => p.Reservations) 
+                .ThenInclude(r => r.User)    
                 .ToListAsync();
 
             _logger.LogInformation("Retrieved {Count} properties for user {Email}", properties.Count, currentUserEmail);
@@ -144,7 +143,7 @@ namespace WebApplication7.Controllers
 
 
 
-        // GET: Properties/Create
+        
         [Authorize]
         public async Task<IActionResult> Create()
         {
@@ -166,7 +165,7 @@ namespace WebApplication7.Controllers
             var property = new Property
             {
                 OwnerUserId = user.UserId,
-                ContactNumber = user.ContactNumber // Pobierz numer kontaktowy
+                ContactNumber = user.ContactNumber 
             };
 
             return View(property);
@@ -197,7 +196,7 @@ namespace WebApplication7.Controllers
                         return View(property);
                     }
 
-                    // Jeśli status nie jest ustawiony, ustaw domyślną wartość
+                    
                     if (string.IsNullOrEmpty(property.Status))
                     {
                         property.Status = "Available";
@@ -205,7 +204,7 @@ namespace WebApplication7.Controllers
 
                     property.OwnerUserId = user.UserId;
                     property.OwnerUser = user;
-                    property.ContactNumber = user.ContactNumber; // Pobierz numer kontaktowy z profilu
+                    property.ContactNumber = user.ContactNumber; 
 
                     _context.Add(property);
                     await _context.SaveChangesAsync();
@@ -227,7 +226,7 @@ namespace WebApplication7.Controllers
             ViewBag.StatusList = new SelectList(new[] { "Available", "Rented", "Under Maintenance" }, selectedStatus);
         }
 
-        // GET: Properties/Edit/5
+        
         [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -255,18 +254,18 @@ namespace WebApplication7.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // Pobierz aktualny numer telefonu użytkownika
+         
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
             if (user != null)
             {
-                property.ContactNumber = user.ContactNumber; // Aktualizacja numeru telefonu
+                property.ContactNumber = user.ContactNumber; 
             }
 
             return View(property);
         }
 
 
-        // POST: Properties/Edit/5
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -310,7 +309,7 @@ namespace WebApplication7.Controllers
                     existingProperty.AdditionalImageUrl1 = property.AdditionalImageUrl1;
                     existingProperty.AdditionalImageUrl2 = property.AdditionalImageUrl2;
 
-                    // ContactNumber pozostaje niezmienialny
+                    
                     existingProperty.ContactNumber = user.ContactNumber;
 
                     _context.Update(existingProperty);

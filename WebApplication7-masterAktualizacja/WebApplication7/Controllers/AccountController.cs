@@ -26,13 +26,13 @@ namespace WebApplication7.Controllers
             _logger = logger;
         }
 
-        // GET: Account/Register
+   
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: Account/Register
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterModel model)
@@ -53,7 +53,7 @@ namespace WebApplication7.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     Email = model.Email,
-                    ContactNumber = model.ContactNumber, // Contact number added
+                    ContactNumber = model.ContactNumber,
                     NormalizedEmail = model.Email.Trim().ToUpperInvariant()
                 };
                 user.SetPassword(model.Password);
@@ -76,13 +76,13 @@ namespace WebApplication7.Controllers
         }
 
 
-        // GET: Account/Login
+       
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: Account/Login
+    
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password)
@@ -108,7 +108,7 @@ namespace WebApplication7.Controllers
                 return View();
             }
 
-            // Tworzenie listy roszczeń (claims)
+           
             var claims = new List<Claim>
 {
     new(ClaimTypes.Name, user.Email),
@@ -116,36 +116,36 @@ namespace WebApplication7.Controllers
     new(ClaimTypes.NameIdentifier, user.UserId.ToString())
 };
 
-            // Jeśli użytkownik jest administratorem, dodaj rolę "Admin"
+           
             if (user.IsAdmin)
             {
                 claims.Add(new Claim(ClaimTypes.Role, "Admin"));
             }
 
-            // Utwórz tożsamość i zaloguj użytkownika
+           
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-            // Przekierowanie na stronę główną po zalogowaniu
+        
             return RedirectToAction("Index", "Home");
         }
 
 
-        // GET: Account/Logout
+     
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: Account/ForgotPassword
+     
         [HttpGet]
         public IActionResult ForgotPassword()
         {
             return View();
         }
 
-        // POST: Account/ForgotPassword
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(string email)
@@ -183,7 +183,7 @@ namespace WebApplication7.Controllers
             return View();
         }
 
-        // GET: Account/ResetPassword
+       
         [HttpGet]
         public async Task<IActionResult> ResetPassword(string token)
         {
@@ -201,7 +201,7 @@ namespace WebApplication7.Controllers
             return View(new ResetPasswordModel { Token = token });
         }
 
-        // POST: Account/ResetPassword
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
@@ -274,7 +274,7 @@ namespace WebApplication7.Controllers
         }
 
 
-        // GET: Account/Profile
+       
         [Authorize]
         public async Task<IActionResult> Profile()
         {
@@ -295,7 +295,7 @@ namespace WebApplication7.Controllers
             return View(user);
         }
 
-        // GET: Account/Edit
+        
         [Authorize]
         public async Task<IActionResult> Edit()
         {
@@ -326,7 +326,7 @@ namespace WebApplication7.Controllers
         }
 
 
-        // POST: Account/Edit
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -359,7 +359,7 @@ namespace WebApplication7.Controllers
                     return Unauthorized("Nieautoryzowany dostęp.");
                 }
 
-                // Sprawdź unikalność e-maila, jeśli został zmieniony
+                
                 if (!string.Equals(existingUser.Email, model.Email, StringComparison.OrdinalIgnoreCase))
                 {
                     var emailExists = await _context.Users.AnyAsync(u => u.Email == model.Email);
@@ -370,7 +370,7 @@ namespace WebApplication7.Controllers
                     }
                 }
 
-                // Zaktualizuj dane użytkownika
+                
                 existingUser.FirstName = model.FirstName;
                 existingUser.LastName = model.LastName;
                 existingUser.ContactNumber = model.ContactNumber;

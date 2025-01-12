@@ -43,7 +43,7 @@ namespace WebApplication7.Models
         {
             if (value == null)
             {
-                return false; // Możesz zwrócić false lub true w zależności od reguły walidacji
+                return false; 
             }
 
             if (value is DateTime date)
@@ -51,7 +51,7 @@ namespace WebApplication7.Models
                 return date >= DateTime.Now.Date;
             }
 
-            return false; // Nieprawidłowy typ danych
+            return false; 
         }
     }
 }

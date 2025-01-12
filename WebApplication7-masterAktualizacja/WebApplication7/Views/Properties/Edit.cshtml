@@ -28,28 +28,28 @@
         <form asp-action="Edit" method="post">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-            <!-- Address -->
+     
             <div class="form-group">
                 <label asp-for="Address" class="control-label"></label>
                 <input asp-for="Address" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
 
-            <!-- Type -->
+           
             <div class="form-group">
                 <label asp-for="Type" class="control-label"></label>
                 <input asp-for="Type" class="form-control" />
                 <span asp-validation-for="Type" class="text-danger"></span>
             </div>
 
-            <!-- Price -->
+      
             <div class="form-group">
                 <label asp-for="Price" class="control-label"></label>
                 <input asp-for="Price" class="form-control" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
 
-            <!-- Status -->
+           
             <div class="form-group">
                 <label asp-for="Status" class="control-label"></label>
                 <select asp-for="Status" class="form-control">
@@ -61,7 +61,7 @@
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
 
-            <!-- Contact Number -->
+          
             <div class="form-group">
                 <label asp-for="ContactNumber" class="control-label"></label>
                 <input asp-for="ContactNumber" class="form-control" readonly />
@@ -69,14 +69,14 @@
             </div>
 
 
-            <!-- Description -->
+        
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
                 <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
-            <!-- Main Image URL -->
+            
             <div class="form-group">
                 <label asp-for="ImageUrl" class="control-label">Main Image URL</label>
                 <input asp-for="ImageUrl" class="form-control" onchange="previewImage(this, 'mainImagePreview')" />
@@ -84,7 +84,7 @@
                 <img id="mainImagePreview" src="@Model.ImageUrl ?? 'https://via.placeholder.com/150'" alt="Main Image Preview" class="img-thumbnail mt-3" />
             </div>
 
-            <!-- Additional Images -->
+         
             <div class="form-group">
                 <label asp-for="AdditionalImageUrl1" class="control-label">Additional Image 1 URL</label>
                 <input asp-for="AdditionalImageUrl1" class="form-control" onchange="previewImage(this, 'additionalImagePreview1')" />
@@ -98,11 +98,11 @@
                 <img id="additionalImagePreview2" src="@Model.AdditionalImageUrl2 ?? 'https://via.placeholder.com/150'" alt="Additional Image 2 Preview" class="img-thumbnail mt-3" />
             </div>
 
-            <!-- Hidden Fields -->
+       
             <input type="hidden" asp-for="PropertyId" />
             <input type="hidden" asp-for="OwnerUserId" />
 
-            <!-- Submit and Cancel Buttons -->
+           
             <div class="form-group mt-4">
                 <input type="submit" value="Save" class="btn btn-primary" />
                 <a asp-action="Details" asp-route-id="@Model.PropertyId" class="btn btn-secondary">Cancel</a>

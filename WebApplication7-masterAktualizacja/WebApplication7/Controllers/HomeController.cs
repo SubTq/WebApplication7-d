@@ -50,7 +50,7 @@ namespace WebApplication7.Controllers
 
             if (admin != null)
             {
-                // Przekierowanie do panelu administracyjnego
+               
                 return RedirectToAction("Index", "Admin");
             }
 

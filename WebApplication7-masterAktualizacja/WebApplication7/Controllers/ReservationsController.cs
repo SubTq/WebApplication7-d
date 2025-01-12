@@ -26,7 +26,7 @@ namespace WebApplication7.Controllers
         }
 
 
-        // GET: Reservations/MyReservations
+        
         public async Task<IActionResult> MyReservations(int? pageNumber)
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
@@ -43,7 +43,7 @@ namespace WebApplication7.Controllers
                 return NotFound("User not found.");
             }
 
-            // Aktualizacja statusów zakończonych rezerwacji
+            
             var reservationsToUpdate = await _context.Reservations
                 .Where(r => r.UserId == user.UserId && r.EndDate < DateTime.Now && r.Status != "Zakończony")
                 .ToListAsync();
@@ -55,7 +55,7 @@ namespace WebApplication7.Controllers
             }
             await _context.SaveChangesAsync();
 
-            // Pobieranie rezerwacji
+            
             int pageSize = 10;
             int currentPage = pageNumber ?? 1;
 
@@ -79,7 +79,7 @@ namespace WebApplication7.Controllers
 
 
 
-        // GET: Reservations/Create
+        
         public async Task<IActionResult> Create(int? propertyId)
         {
             if (propertyId == null)
@@ -99,7 +99,7 @@ namespace WebApplication7.Controllers
             return View();
         }
 
-        // POST: Reservations/Create
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ReservationId,PropertyId,StartDate,EndDate,Status")] Reservation reservation)
@@ -165,7 +165,7 @@ namespace WebApplication7.Controllers
             return RedirectToAction(nameof(MyReservations));
         }
 
-        // GET: Reservations/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -193,7 +193,7 @@ namespace WebApplication7.Controllers
         }
 
 
-        // POST: Reservations/Edit/5
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ReservationId,PropertyId,StartDate,EndDate,Status,UserId")] Reservation reservation)
@@ -207,11 +207,11 @@ namespace WebApplication7.Controllers
             {
                 try
                 {
-                    // Logowanie w celu śledzenia danych wejściowych
+                    
                     _logger.LogInformation("Rozpoczęcie aktualizacji rezerwacji. Reservation ID: {ReservationId}, User ID: {UserId}, Property ID: {PropertyId}, StartDate: {StartDate}, EndDate: {EndDate}",
                         reservation.ReservationId, reservation.UserId, reservation.PropertyId, reservation.StartDate, reservation.EndDate);
 
-                    // Walidacja UserId - czy użytkownik istnieje
+                    
                     if (!_context.Users.Any(u => u.UserId == reservation.UserId))
                     {
                         _logger.LogWarning("Nieprawidłowy UserId: {UserId} dla rezerwacji ID: {ReservationId}", reservation.UserId, reservation.ReservationId);
@@ -219,7 +219,7 @@ namespace WebApplication7.Controllers
                         return View(reservation);
                     }
 
-                    // Sprawdzenie konfliktów w datach
+                    
                     var conflictingReservations = await _context.Reservations
                         .Where(r => r.PropertyId == reservation.PropertyId &&
                                     r.StartDate < reservation.EndDate &&
@@ -236,7 +236,7 @@ namespace WebApplication7.Controllers
                         return View(reservation);
                     }
 
-                    // Aktualizacja rezerwacji
+                   
                     _context.Update(reservation);
                     await _context.SaveChangesAsync();
 
@@ -256,7 +256,7 @@ namespace WebApplication7.Controllers
                 return RedirectToAction(nameof(MyReservations));
             }
 
-            // Logowanie w przypadku nieprawidłowego ModelState
+            
             _logger.LogWarning("ModelState nie jest prawidłowy dla rezerwacji ID: {ReservationId}.", reservation.ReservationId);
             return View(reservation);
         }
@@ -267,7 +267,7 @@ namespace WebApplication7.Controllers
         }
 
 
-        // GET: Reservations/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -291,7 +291,7 @@ namespace WebApplication7.Controllers
             return View(reservation);
         }
 
-        // POST: Reservations/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -324,7 +324,7 @@ namespace WebApplication7.Controllers
         }
 
 
-        // GET: Reservations/Details/5
+        
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -334,7 +334,7 @@ namespace WebApplication7.Controllers
 
             var reservation = await _context.Reservations
                 .Include(r => r.Property)
-                .ThenInclude(p => p.OwnerUser) // Dodaj dołączenie danych właściciela
+                .ThenInclude(p => p.OwnerUser) 
                 .FirstOrDefaultAsync(m => m.ReservationId == id);
 
             if (reservation == null)
@@ -347,7 +347,7 @@ namespace WebApplication7.Controllers
 
 
 
-        // New method to get property details
+        
         [HttpGet]
         public async Task<IActionResult> GetPropertyDetails(int propertyId)
         {
@@ -397,7 +397,7 @@ namespace WebApplication7.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ManageReservation(int id, string status)
         {
-            // Znajdź rezerwację na podstawie ID
+            
             var reservation = await _context.Reservations
                 .Include(r => r.Property)
                 .FirstOrDefaultAsync(r => r.ReservationId == id);
@@ -407,22 +407,22 @@ namespace WebApplication7.Controllers
                 return NotFound("Reservation not found.");
             }
 
-            // Aktualizuj status rezerwacji
+            
             reservation.Status = status;
 
             try
             {
                 _context.Update(reservation);
-                await _context.SaveChangesAsync(); // Zapisz zmiany w bazie danych
+                await _context.SaveChangesAsync(); 
             }
             catch (DbUpdateException ex)
             {
                 _logger.LogError(ex, "Error while updating reservation status.");
                 ModelState.AddModelError("", "Unable to update reservation status. Try again later.");
-                return View(reservation); // Wyświetl błąd w tym samym widoku
+                return View(reservation); 
             }
 
-            // Przekieruj użytkownika z powrotem do listy właściwości
+            
             return RedirectToAction("MyProperties", "Properties");
         }
 

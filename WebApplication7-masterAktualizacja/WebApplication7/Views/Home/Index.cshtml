@@ -34,13 +34,13 @@
         $('#searchString').on('input', function () {
             let query = $(this).val();
 
-            // Gdy pole jest puste, załaduj wszystkie nieruchomości
+          
             if (query.trim() === "") {
                 loadAllProperties();
                 return;
             }
 
-            // Gdy użytkownik wpisuje frazę, wykonaj filtrowanie
+            
             $.ajax({
                 url: '/Properties/SearchProperties',
                 type: 'GET',
@@ -67,12 +67,12 @@
             });
         });
 
-        // Funkcja ładowania wszystkich nieruchomości
+        
         function loadAllProperties() {
             $.ajax({
                 url: '/Properties/SearchProperties',
                 type: 'GET',
-                data: { query: '' }, // Wysłanie pustego zapytania, aby załadować wszystkie nieruchomości
+                data: { query: '' }, 
                 success: function (response) {
                     $('#propertiesList').empty();
                     response.properties.forEach(property => {
@@ -95,7 +95,7 @@
             });
         }
 
-        // Załaduj wszystkie nieruchomości na początku
+        
         loadAllProperties();
     });
 </script>

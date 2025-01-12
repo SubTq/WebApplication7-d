@@ -23,7 +23,7 @@ namespace WebApplication7.Controllers
         }
 
 
-        // Lista użytkowników
+     
         public async Task<IActionResult> Users()
         {
             var users = await _context.Users.ToListAsync();
@@ -35,7 +35,7 @@ namespace WebApplication7.Controllers
             }
             else
             {
-                // Jeśli nie można znaleźć lub sparsować UserId, przekieruj użytkownika lub ustaw domyślną wartość.
+              
                 TempData["ErrorMessage"] = "Unable to determine the current user ID.";
                 return RedirectToAction("Index", "Home");
             }
@@ -46,7 +46,7 @@ namespace WebApplication7.Controllers
 
 
 
-        // Usuwanie użytkownika
+      
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -63,14 +63,14 @@ namespace WebApplication7.Controllers
             return RedirectToAction(nameof(Users));
         }
 
-        // Lista nieruchomości
+      
         public async Task<IActionResult> Properties()
         {
             var properties = await _context.Properties.ToListAsync();
             return View(properties);
         }
 
-        // Usuwanie nieruchomości
+      
         public async Task<IActionResult> DeleteProperty(int id)
         {
             var property = await _context.Properties.FindAsync(id);
@@ -87,7 +87,7 @@ namespace WebApplication7.Controllers
             return RedirectToAction(nameof(Properties));
         }
 
-        // Lista rezerwacji
+       
         public async Task<IActionResult> Reservations()
         {
             var reservations = await _context.Reservations
@@ -97,7 +97,6 @@ namespace WebApplication7.Controllers
             return View(reservations);
         }
 
-        // Usuwanie rezerwacji
         public async Task<IActionResult> DeleteReservation(int id)
         {
             var reservation = await _context.Reservations.FindAsync(id);

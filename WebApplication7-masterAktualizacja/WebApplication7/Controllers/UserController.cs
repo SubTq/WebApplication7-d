@@ -18,14 +18,14 @@ namespace WebApplication7.Controllers
             _logger = logger;
         }
 
-        // GET: Users
+        
         public async Task<IActionResult> Index()
         {
             _logger.LogInformation("Index action called");
             return View(await _context.Users.ToListAsync());
         }
 
-        // GET: Users/Details/5
+        
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -43,14 +43,14 @@ namespace WebApplication7.Controllers
             return View(user);
         }
 
-        // GET: Users/Create
+        
         public IActionResult Create()
         {
             _logger.LogInformation("Create action called");
             return View();
         }
 
-        // POST: Users/Create
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserId,FirstName,LastName,Email,Password")] User user)
@@ -66,7 +66,7 @@ namespace WebApplication7.Controllers
             return View(user);
         }
 
-        // GET: Users/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -82,7 +82,7 @@ namespace WebApplication7.Controllers
             return View(user);
         }
 
-        // POST: Users/Edit/5
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("UserId,FirstName,LastName,Email,Password")] User user)
@@ -115,7 +115,7 @@ namespace WebApplication7.Controllers
             return View(user);
         }
 
-        // GET: Users/Delete/5
+       
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -133,7 +133,7 @@ namespace WebApplication7.Controllers
             return View(user);
         }
 
-        // POST: Users/Delete/5
+       
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

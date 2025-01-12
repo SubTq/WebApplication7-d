@@ -20,16 +20,16 @@ namespace WebApplication7.Data
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
-                .IsUnique(); // Ensure unique email addresses
+                .IsUnique(); 
 
             modelBuilder.Entity<Property>()
                 .Property(p => p.Price)
                 .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Property>()
-     .HasOne(p => p.OwnerUser)
-     .WithMany(u => u.Properties)
-     .HasForeignKey(p => p.OwnerUserId);
+                .HasOne(p => p.OwnerUser)
+                .WithMany(u => u.Properties)
+                .HasForeignKey(p => p.OwnerUserId);
 
 
             modelBuilder.Entity<Property>()
@@ -55,7 +55,7 @@ namespace WebApplication7.Data
 
         public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
-            // Automatyczna aktualizacja statusu rezerwacji na "Zakończony"
+            
             var reservationsToUpdate = ChangeTracker.Entries<Reservation>()
                 .Where(e => e.Entity.EndDate < DateTime.Now && e.Entity.Status != "Ended")
                 .Select(e => e.Entity);

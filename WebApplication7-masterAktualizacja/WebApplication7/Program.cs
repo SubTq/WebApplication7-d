@@ -5,18 +5,18 @@ using WebApplication7.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Konfiguracja Serilog (Logger)
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
 
 builder.Host.UseSerilog();
 
-// Konfiguracja DbContext
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Konfiguracja uwierzytelniania za pomoc¹ cookies
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -24,14 +24,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Account/Logout";
     });
 
-// Dodaj widoki i kontrolery do aplikacji
+
 builder.Services.AddControllersWithViews();
 
-// Ustawienia lokalizacji i waluty
+
 var cultureInfo = new System.Globalization.CultureInfo("en-US");
 cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
 cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
-cultureInfo.NumberFormat.CurrencySymbol = "PLN"; // Ustawienie symbolu waluty
+cultureInfo.NumberFormat.CurrencySymbol = "PLN"; 
 System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
@@ -42,7 +42,7 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Obs³uga wyj¹tków
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();

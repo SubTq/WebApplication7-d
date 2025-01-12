@@ -20,7 +20,7 @@ namespace WebApplication7.Models
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        public string? NormalizedEmail { get; set; } // Pole nie wymagane w formularzu edycji.
+        public string? NormalizedEmail { get; set; } 
 
         [Required]
         [DataType(DataType.Password)]
@@ -32,7 +32,6 @@ namespace WebApplication7.Models
         [Phone]
         public string? ContactNumber { get; set; }
 
-        // Dodaj pole IsAdmin
         public bool IsAdmin { get; set; } = false;
 
         public ICollection<Property> Properties { get; set; } = new List<Property>();
